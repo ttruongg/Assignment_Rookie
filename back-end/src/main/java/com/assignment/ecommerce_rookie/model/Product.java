@@ -29,6 +29,10 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images = new ArrayList<>();
 
+//    @NotBlank(message = "Brand cannot be blank")
+//    @Size(min = 3, message = "Brand name must contain at least 3 characters")
+//    private String brand;
+
     @NotBlank
     @Size(min = 6, message = "Description must contain at least 6 characters")
     private String description;
