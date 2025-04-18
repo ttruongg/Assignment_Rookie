@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
@@ -15,7 +16,6 @@ import java.util.List;
 @Table(name = "product")
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Product {
 
     @Id
@@ -29,9 +29,9 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductImage> images = new ArrayList<>();
 
-//    @NotBlank(message = "Brand cannot be blank")
-//    @Size(min = 3, message = "Brand name must contain at least 3 characters")
-//    private String brand;
+
+    @Size(min = 3, message = "Brand name must contain at least 3 characters")
+    private String brand;
 
     @NotBlank
     @Size(min = 6, message = "Description must contain at least 6 characters")
@@ -41,7 +41,7 @@ public class Product {
     private double price;
     private double discount;
     private double specialPrice;
-    private boolean isFeatured;
+    private boolean featured;
 
 
     @ManyToOne

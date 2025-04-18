@@ -14,13 +14,13 @@ public class ProductDTO {
     private Long productId;
     private String productName;
     private List<ProductImage> images;
-//    private String brand;
+    private String brand;
     private String description;
     private int quantity;
     private double price;
     private double discount;
     private double specialPrice;
-    private boolean isFeatured;
+    private boolean featured;
 
 
 }
