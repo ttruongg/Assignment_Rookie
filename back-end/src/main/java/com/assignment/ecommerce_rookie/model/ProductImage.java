@@ -1,5 +1,6 @@
 package com.assignment.ecommerce_rookie.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -14,6 +15,7 @@ public class ProductImage {
 
     @ManyToOne
     @JoinColumn(name = "productId")
+    @JsonBackReference
     private Product product;
 
 }
