@@ -50,12 +50,14 @@ public class Product {
     private double specialPrice;
     private boolean featured;
 
+
     @Column(nullable = false, updatable = false)
     @CreatedDate
     private LocalDateTime createdOn;
 
     @LastModifiedDate
     private LocalDateTime lastUpdatedOn;
+
 
 
     @ManyToOne
