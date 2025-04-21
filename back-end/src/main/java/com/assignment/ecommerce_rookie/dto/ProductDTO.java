@@ -4,7 +4,7 @@ import com.assignment.ecommerce_rookie.model.ProductImage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -21,6 +21,7 @@ public class ProductDTO {
     private double discount;
     private double specialPrice;
     private boolean featured;
-
+    private LocalDateTime createdOn;
+    private LocalDateTime lastUpdatedOn;
 
 }
