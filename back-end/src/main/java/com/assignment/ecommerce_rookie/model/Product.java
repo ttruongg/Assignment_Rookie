@@ -8,11 +8,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Data
 @Table(name = "product")
 @NoArgsConstructor
@@ -44,6 +49,13 @@ public class Product {
     private double discount;
     private double specialPrice;
     private boolean featured;
+
+    @Column(nullable = false, updatable = false)
+    @CreatedDate
+    private LocalDateTime createdOn;
+
+    @LastModifiedDate
+    private LocalDateTime lastUpdatedOn;
 
 
     @ManyToOne
