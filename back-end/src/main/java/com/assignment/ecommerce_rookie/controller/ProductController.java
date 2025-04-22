@@ -17,7 +17,7 @@ public class ProductController {
     IProductService productService;
 
 
-    @GetMapping("/products")
+    @GetMapping("/public/products")
     public ResponseEntity<ProductResponse> getAllProduct(
             @RequestParam(defaultValue = AppConstants.PAGE_NUMBER) int pageNumber,
             @RequestParam(defaultValue = AppConstants.PAGE_SIZE) int pageSize,
@@ -28,7 +28,7 @@ public class ProductController {
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-    @PostMapping("/admin/{categoryId}/product")
+    @PostMapping("public/admin/{categoryId}/product")
     public ResponseEntity<ProductDTO> addProduct(
             @RequestBody @Valid ProductDTO productDTO,
             @PathVariable(name = "categoryId") Long categoryId) {
@@ -38,7 +38,7 @@ public class ProductController {
     }
 
 
-    @GetMapping("/{categoryId}/products")
+    @GetMapping("public/{categoryId}/products")
     public ResponseEntity<ProductResponse> getProductByCategory(
             @PathVariable(name = "categoryId") Long categoryId,
             @RequestParam(defaultValue = AppConstants.PAGE_NUMBER) int pageNumber,
@@ -52,7 +52,7 @@ public class ProductController {
 
     }
 
-    @GetMapping("/products/{keyword}")
+    @GetMapping("/public/products/{keyword}")
     public ResponseEntity<ProductResponse> getProductByKeyWord(
             @PathVariable String keyword,
             @RequestParam(defaultValue = AppConstants.PAGE_NUMBER) int pageNumber,

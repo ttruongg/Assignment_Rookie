@@ -37,6 +37,11 @@ public class User {
     @Column(name = "email")
     private String email;
 
+    @NotBlank(message = "First Name is required")
+    private String firstName;
+
+    @NotBlank(message = "Last Name is required")
+    private String lastName;
 
     @NotBlank
     @Size(min = 10)
