@@ -2,6 +2,7 @@ package com.assignment.ecommerce_rookie.controller;
 
 import com.assignment.ecommerce_rookie.security.request.LoginRequest;
 import com.assignment.ecommerce_rookie.service.impl.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,13 +16,15 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    @PostMapping
+    @PostMapping("/signin")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         return authService.login(loginRequest);
     }
 
-
-
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshAccessToken(HttpServletRequest request) {
+        return authService.refreshAccessToken(request);
+    }
 
 
 }
