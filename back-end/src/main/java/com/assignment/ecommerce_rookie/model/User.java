@@ -15,6 +15,7 @@ import java.util.Set;
 @Entity
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "username"),
         @UniqueConstraint(columnNames = "email")
@@ -27,7 +28,7 @@ public class User {
     private Long userId;
 
     @NotBlank
-    @Size(min = 8, message = "Username must contain at least 8 character")
+    @Size(min = 5, message = "Username must contain at least 6 character")
     @Column(name = "userName")
     private String userName;
 
@@ -44,28 +45,30 @@ public class User {
     private String lastName;
 
     @NotBlank
-    @Size(min = 10)
+    @Size(max = 10)
     @Column(name = "phoneNumber")
     private String phoneNumber;
 
     @NotBlank
-    @Size(max = 50)
     @Column(name = "password")
     private String password;
 
-    public User(String userName, String email, String password) {
+
+    @Getter
+    @Setter
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "roleId", nullable = false)
+    private Role role;
+
+    public User(String userName, String email, String firstName, String lastName, String phoneNumber, String password, Role role) {
         this.userName = userName;
         this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNumber = phoneNumber;
         this.password = password;
+        this.role = role;
     }
-
-    @Setter
-    @Getter
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
-    @JoinTable(name = "userRole",
-            joinColumns = @JoinColumn(name = "userId"),
-            inverseJoinColumns = @JoinColumn(name = "roleId"))
-    private Set<Role> roles = new HashSet<>();
 
     @Getter
     @Setter

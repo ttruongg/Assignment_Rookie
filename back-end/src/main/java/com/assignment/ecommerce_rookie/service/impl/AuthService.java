@@ -1,8 +1,14 @@
 package com.assignment.ecommerce_rookie.service.impl;
 
+import com.assignment.ecommerce_rookie.model.AppRole;
+import com.assignment.ecommerce_rookie.model.Role;
+import com.assignment.ecommerce_rookie.model.User;
+import com.assignment.ecommerce_rookie.repository.RoleRepository;
 import com.assignment.ecommerce_rookie.repository.UserRepository;
 import com.assignment.ecommerce_rookie.security.jwt.JwtUtils;
 import com.assignment.ecommerce_rookie.security.request.LoginRequest;
+import com.assignment.ecommerce_rookie.security.request.SignUpRequest;
+import com.assignment.ecommerce_rookie.security.response.MessageResponse;
 import com.assignment.ecommerce_rookie.security.response.UserInfoResponse;
 import com.assignment.ecommerce_rookie.security.services.UserDetailsImpl;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +26,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -42,14 +49,20 @@ public class AuthService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     @Value("${jwt.RefreshTokenCookieName}")
     private String refreshTokenCookie;
+
+    @Autowired
+    PasswordEncoder encoder;
 
 
     public ResponseEntity<?> login(LoginRequest loginRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -123,5 +136,44 @@ public class AuthService {
         }
     }
 
+    public ResponseEntity<?> signup(SignUpRequest signUpRequest) {
+        if (userRepository.existsByUserName(signUpRequest.getUserName())) {
+            return new ResponseEntity<>(new MessageResponse("Username is already taken"), HttpStatus.BAD_REQUEST);
+        }
+
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return new ResponseEntity<>(new MessageResponse("Email is already in use"), HttpStatus.BAD_REQUEST);
+        }
+
+        String strRole = signUpRequest.getRole();
+
+        Role userRole = new Role();
+        if (strRole == null) {
+            userRole = roleRepository.findByRoleName(AppRole.USER)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+
+        } else {
+            userRole = roleRepository.findByRoleName(AppRole.ADMIN)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        }
+
+        User user = new User(
+                signUpRequest.getUserName(),
+                signUpRequest.getEmail(),
+                signUpRequest.getFirstName(),
+                signUpRequest.getLastName(),
+                signUpRequest.getPhoneNumber(),
+                encoder.encode(signUpRequest.getPassword()),
+                userRole
+                );
+
+
+        userRepository.save(user);
+
+//        Map<String, Object> map = new HashMap<>();
+//        map.put("message", "User registered successfully");
+//        map.put("status", true);
+        return new ResponseEntity<>(new MessageResponse("User registered successfully!"), HttpStatus.CREATED);
+    }
 
 }
