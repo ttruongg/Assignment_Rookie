@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
@@ -18,6 +19,7 @@ import org.springframework.web.util.WebUtils;
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 
 @Component
@@ -79,6 +81,32 @@ public class JwtUtils {
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public ResponseCookie cleanAccessTokenCookie() {
+        ResponseCookie accessCookie = ResponseCookie.from(accessTokenCookie, null)
+                .path("/api")
+                .maxAge(0)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .build();
+
+        return accessCookie;
+
+
+    }
+
+    public ResponseCookie cleanRefreshTokenCookie() {
+        ResponseCookie refreshCookie = ResponseCookie.from(refreshTokenCookie, null)
+                .path("/api/auth/refresh-token")
+                .maxAge(0)
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .build();
+
+        return refreshCookie;
     }
 
     private Key key() {

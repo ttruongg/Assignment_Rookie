@@ -87,10 +87,7 @@ public class AuthService {
                     .body(response);
 
         } catch (AuthenticationException exception) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("message", "Bad credentials");
-            map.put("status", false);
-            return new ResponseEntity<>(map, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new MessageResponse("Bad credentials"), HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -102,10 +99,7 @@ public class AuthService {
 
 
             if (refreshToken == null || !jwtUtils.validateJwtToken(refreshToken)) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("message", "Invalid refresh token");
-                map.put("status", false);
-                return new ResponseEntity<>(map, HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(new MessageResponse("Invalid refresh token"), HttpStatus.UNAUTHORIZED);
             }
 
 
@@ -121,18 +115,10 @@ public class AuthService {
             ResponseCookie accessTokenCookie = jwtUtils.generateAccessTokenCookie((UserDetailsImpl) userDetails);
 
 
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
-                    .body(new HashMap<String, Object>() {{
-                        put("message", "Access token refreshed");
-                        put("status", true);
-                    }});
+            return new ResponseEntity<>(new MessageResponse("Access token refreshed"), HttpStatus.OK);
 
         } catch (Exception exception) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("message", "Failed to refresh token");
-            map.put("status", false);
-            return new ResponseEntity<>(map, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new MessageResponse("Failed to refresh token"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -165,15 +151,22 @@ public class AuthService {
                 signUpRequest.getPhoneNumber(),
                 encoder.encode(signUpRequest.getPassword()),
                 userRole
-                );
+        );
 
 
         userRepository.save(user);
 
-//        Map<String, Object> map = new HashMap<>();
-//        map.put("message", "User registered successfully");
-//        map.put("status", true);
         return new ResponseEntity<>(new MessageResponse("User registered successfully!"), HttpStatus.CREATED);
+    }
+
+    public ResponseEntity<?> logout() {
+        ResponseCookie accessTokenCookie = jwtUtils.cleanAccessTokenCookie();
+        ResponseCookie refreshTokenCookie = jwtUtils.cleanRefreshTokenCookie();
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .body(new MessageResponse("User logged out successfully!"));
     }
 
 }
