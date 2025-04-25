@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class categoryServiceTest {
+class categoryServiceImplTest {
 
     @Mock
     private CategoryRepository categoryRepository;
@@ -24,7 +24,7 @@ class categoryServiceTest {
     private CategoryMapper categoryMapper;
 
     @InjectMocks
-    private categoryService categoryService;
+    private CategoryServiceImpl CategoryServiceImpl;
 
     @Test
     void testCreateCategory_Success_returnCategoryDTO() {
@@ -49,7 +49,7 @@ class categoryServiceTest {
         when(categoryMapper.toCategoryDTO(savedCategory)).thenReturn(savedCategoryDTO);
 
 
-        CategoryDTO result = categoryService.createCategory(categoryDTO);
+        CategoryDTO result = CategoryServiceImpl.createCategory(categoryDTO);
 
 
         assertNotNull(result);
@@ -76,7 +76,7 @@ class categoryServiceTest {
 
 
         APIException exception = assertThrows(APIException.class, () -> {
-            categoryService.createCategory(categoryDTO);
+            CategoryServiceImpl.createCategory(categoryDTO);
         });
 
         assertEquals("Category already exists!", exception.getMessage());

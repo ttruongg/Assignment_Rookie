@@ -5,7 +5,7 @@ import com.assignment.ecommerce_rookie.dto.ProductResponse;
 
 public interface IProductService {
 
-    ProductResponse getAllProducts(int pageNumber, int pageSize, String sortBy, String sortOrder);
+    ProductResponse getAllProducts(int pageNumber, int pageSize, String sortBy, String sortOrder, String keyword, String category);
 
     ProductDTO addProduct(ProductDTO productDTO, Long categoryId);
 

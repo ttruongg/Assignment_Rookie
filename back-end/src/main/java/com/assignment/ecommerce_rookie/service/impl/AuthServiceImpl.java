@@ -29,13 +29,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class AuthService {
+public class AuthServiceImpl {
 
     @Autowired
     private AuthenticationManager authenticationManager;
