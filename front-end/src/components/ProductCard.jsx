@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
+import ProductViewModal from "./ProductViewModal";
 const ProductCard = ({
   productId,
   productName,
@@ -13,14 +14,14 @@ const ProductCard = ({
 }) => {
   const isAvailable = quantity && Number(quantity) > 0;
 
-  const [openProductViewModel, setOpenProductViewModel] = useState(false);
+  const [openProductViewModal, setOpenProductViewModal] = useState(false);
   const [selectedViewProduct, setSelectedViewProduct] = useState("");
 
   const btnLoader = false;
 
   const handleProductView = (product) => {
     setSelectedViewProduct(product);
-    setOpenProductViewModel(true);
+    setOpenProductViewModal(true);
   };
 
   return (
@@ -45,7 +46,7 @@ const ProductCard = ({
           className="w-full h-full cursor-pointer transition-transform duration-300 transform hover:scale-105"
           src={image}
           alt={productName}
-        ></img>
+        />
       </div>
 
       <div className="p-4">
@@ -87,18 +88,31 @@ const ProductCard = ({
           )}
 
           <button
+            onClick={() => {}}
+            className="bg-blue-600 text-white py-2 px-3 rounded-lg items-center transition-colors duration-300 w-30 flex justify-center opacity-100 hover:bg-blue-800"
+          >
+            View Product
+          </button>
+
+          <button
             disabled={!isAvailable || btnLoader}
             onClick={() => {}}
             className={`bg-blue-600 ${
               isAvailable ? "opacity-100 hover:bg-blue-800" : "opacity-70"
             }
-            text-white py-2 px-3 rounded-lg items-center transition-colors duration-300 w-36 flex justify-center`}
+            text-white py-2 px-3 rounded-lg items-center transition-colors duration-300 w-30 flex justify-center`}
           >
             <FaCartShopping className="mr-2" />
             {isAvailable ? "Add to Cart" : "Stock Out"}
           </button>
         </div>
       </div>
+      <ProductViewModal
+        open={openProductViewModal}
+        setOpen={setOpenProductViewModal}
+        product={selectedViewProduct}
+        isAvailable={isAvailable}
+      />
     </div>
   );
 };
