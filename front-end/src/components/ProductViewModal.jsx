@@ -81,7 +81,7 @@ function ProductViewModal({ open, setOpen, product, isAvailable }) {
                       />
                     ) : (
                       <Status
-                        text="In Stock"
+                        text="Out of Stock"
                         icon={MdClose}
                         bg="bg-rose-200"
                         color="text-rose-900"
