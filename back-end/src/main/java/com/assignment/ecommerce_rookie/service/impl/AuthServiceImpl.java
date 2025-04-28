@@ -1,8 +1,14 @@
 package com.assignment.ecommerce_rookie.service.impl;
 
+import com.assignment.ecommerce_rookie.model.AppRole;
+import com.assignment.ecommerce_rookie.model.Role;
+import com.assignment.ecommerce_rookie.model.User;
+import com.assignment.ecommerce_rookie.repository.RoleRepository;
 import com.assignment.ecommerce_rookie.repository.UserRepository;
 import com.assignment.ecommerce_rookie.security.jwt.JwtUtils;
 import com.assignment.ecommerce_rookie.security.request.LoginRequest;
+import com.assignment.ecommerce_rookie.security.request.SignUpRequest;
+import com.assignment.ecommerce_rookie.security.response.MessageResponse;
 import com.assignment.ecommerce_rookie.security.response.UserInfoResponse;
 import com.assignment.ecommerce_rookie.security.services.UserDetailsImpl;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,15 +26,14 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class AuthService {
+public class AuthServiceImpl {
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -42,14 +47,20 @@ public class AuthService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     @Value("${jwt.RefreshTokenCookieName}")
     private String refreshTokenCookie;
+
+    @Autowired
+    PasswordEncoder encoder;
 
 
     public ResponseEntity<?> login(LoginRequest loginRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -74,10 +85,7 @@ public class AuthService {
                     .body(response);
 
         } catch (AuthenticationException exception) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("message", "Bad credentials");
-            map.put("status", false);
-            return new ResponseEntity<>(map, HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new MessageResponse("Bad credentials"), HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -89,10 +97,7 @@ public class AuthService {
 
 
             if (refreshToken == null || !jwtUtils.validateJwtToken(refreshToken)) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("message", "Invalid refresh token");
-                map.put("status", false);
-                return new ResponseEntity<>(map, HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(new MessageResponse("Invalid refresh token"), HttpStatus.UNAUTHORIZED);
             }
 
 
@@ -108,20 +113,58 @@ public class AuthService {
             ResponseCookie accessTokenCookie = jwtUtils.generateAccessTokenCookie((UserDetailsImpl) userDetails);
 
 
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
-                    .body(new HashMap<String, Object>() {{
-                        put("message", "Access token refreshed");
-                        put("status", true);
-                    }});
+            return new ResponseEntity<>(new MessageResponse("Access token refreshed"), HttpStatus.OK);
 
         } catch (Exception exception) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("message", "Failed to refresh token");
-            map.put("status", false);
-            return new ResponseEntity<>(map, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new MessageResponse("Failed to refresh token"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    public ResponseEntity<?> signup(SignUpRequest signUpRequest) {
+        if (userRepository.existsByUserName(signUpRequest.getUserName())) {
+            return new ResponseEntity<>(new MessageResponse("Username is already taken"), HttpStatus.BAD_REQUEST);
+        }
+
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return new ResponseEntity<>(new MessageResponse("Email is already in use"), HttpStatus.BAD_REQUEST);
+        }
+
+        String strRole = signUpRequest.getRole();
+
+        Role userRole = new Role();
+        if (strRole == null) {
+            userRole = roleRepository.findByRoleName(AppRole.USER)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+
+        } else {
+            userRole = roleRepository.findByRoleName(AppRole.ADMIN)
+                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        }
+
+        User user = new User(
+                signUpRequest.getUserName(),
+                signUpRequest.getEmail(),
+                signUpRequest.getFirstName(),
+                signUpRequest.getLastName(),
+                signUpRequest.getPhoneNumber(),
+                encoder.encode(signUpRequest.getPassword()),
+                userRole
+        );
+
+
+        userRepository.save(user);
+
+        return new ResponseEntity<>(new MessageResponse("User registered successfully!"), HttpStatus.CREATED);
+    }
+
+    public ResponseEntity<?> logout() {
+        ResponseCookie accessTokenCookie = jwtUtils.cleanAccessTokenCookie();
+        ResponseCookie refreshTokenCookie = jwtUtils.cleanRefreshTokenCookie();
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
+                .body(new MessageResponse("User logged out successfully!"));
+    }
 
 }

@@ -11,8 +11,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
-    Page<Product> findByCategoryOrderByPriceAsc(Category category, Pageable page);
+public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
+    //Page<Product> findByCategoryOrderByPriceAsc(Category category, Pageable page);
 
     Page<Product> findByProductNameLikeIgnoreCase(String keyword, Pageable page);
 
