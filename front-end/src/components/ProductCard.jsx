@@ -4,7 +4,7 @@ import ProductViewModal from "./ProductViewModal";
 const ProductCard = ({
   productId,
   productName,
-  image,
+  images,
   quantity,
   brand,
   description,
@@ -19,6 +19,8 @@ const ProductCard = ({
 
   const btnLoader = false;
 
+  const productImage = images && images.length > 0 ? images[0].imageUrl : "";
+
   const handleProductView = (product) => {
     setSelectedViewProduct(product);
     setOpenProductViewModal(true);
@@ -31,7 +33,7 @@ const ProductCard = ({
           handleProductView({
             id: productId,
             productName,
-            image,
+            images,
             quantity,
             brand,
             description,
@@ -44,7 +46,7 @@ const ProductCard = ({
       >
         <img
           className="w-full h-full cursor-pointer transition-transform duration-300 transform hover:scale-105"
-          src={image}
+          src={productImage}
           alt={productName}
         />
       </div>
@@ -55,7 +57,7 @@ const ProductCard = ({
             handleProductView({
               id: productId,
               productName,
-              image,
+              images,
               quantity,
               brand,
               description,
