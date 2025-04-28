@@ -64,7 +64,12 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/auth/**").permitAll()
                                 .requestMatchers("/api/public/**").permitAll()
+                                .requestMatchers("/v3/api-docs/**").permitAll()
+                                .requestMatchers("/swagger-ui/**").permitAll()
+                                .requestMatchers("/swagger-ui.html").permitAll()
+                                .requestMatchers("/error").permitAll()
                                 .anyRequest().authenticated()
+
                 );
 
         http.authenticationProvider(authenticationProvider());
@@ -73,6 +78,17 @@ public class WebSecurityConfig {
 
 
         return http.build();
+    }
+
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web -> web.ignoring().requestMatchers("/v2/api-docs",
+                "/v3/api-docs/**",
+                "/configuration/ui",
+                "/swagger-resources/**",
+                "/configuration/security",
+                "/swagger-ui.html",
+                "/webjars/**"));
     }
 
 
