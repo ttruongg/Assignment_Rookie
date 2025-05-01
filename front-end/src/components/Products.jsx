@@ -14,11 +14,11 @@ const Products = () => {
   const dispatch = useDispatch();
   useProductFilter();
 
+
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
-  console.log("products:", products);
 
   return (
     <div className="lg:px-14 sm:px-8 px-4 py-14 2xl:w-[90%] 2xl:mx-auto">

@@ -17,7 +17,7 @@ import { GrPowerReset } from "react-icons/gr";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 const Filter = ({ categories }) => {
-  console.log("categories:", categories);
+
   const [searchParams] = useSearchParams();
   const pathName = useLocation().pathname;
   const params = new URLSearchParams(searchParams);
