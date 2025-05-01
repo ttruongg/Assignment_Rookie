@@ -12,12 +12,11 @@ const Products = () => {
   const { products, categories } = useSelector((state) => state.products);
 
   const dispatch = useDispatch();
+  useProductFilter();
 
   useEffect(() => {
     dispatch(fetchCategories());
   }, [dispatch]);
-
-  useProductFilter();
 
   console.log("products:", products);
 
