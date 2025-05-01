@@ -20,7 +20,7 @@ public class CategoryController {
     private ICategoryService categoryService;
 
 
-    @GetMapping("/categories")
+    @GetMapping("/public/categories")
     public ResponseEntity<CategoryResponse> getCategories(
             @RequestParam(defaultValue = AppConstants.PAGE_NUMBER, required = false) int pageNumber,
             @RequestParam(defaultValue = AppConstants.PAGE_SIZE, required = false) int pageSize,
@@ -33,7 +33,7 @@ public class CategoryController {
 
     }
 
-    @PostMapping("/categories")
+    @PostMapping("/admin/categories")
     public ResponseEntity<CategoryDTO> createCategory(@RequestBody @Valid CategoryDTO categoryDTO) {
         CategoryDTO savedCategory = categoryService.createCategory(categoryDTO);
         return new ResponseEntity<>(savedCategory, HttpStatus.CREATED);
@@ -46,7 +46,7 @@ public class CategoryController {
         return new ResponseEntity<>(deletedCategory, HttpStatus.OK);
     }
 
-    @PutMapping("/categories/{categoryId}")
+    @PutMapping("admin/categories/{categoryId}")
     public ResponseEntity<CategoryDTO> updateCategory(@RequestBody @Valid CategoryDTO categoryDTO, @PathVariable Long categoryId) {
         CategoryDTO updatedCategory = categoryService.updateCategory(categoryDTO, categoryId);
         return new ResponseEntity<>(updatedCategory, HttpStatus.OK);

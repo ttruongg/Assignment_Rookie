@@ -16,13 +16,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ProductService implements IProductService {
+public class ProductServiceImpl implements IProductService {
     @Autowired
     private ProductRepository productRepository;
 
@@ -33,23 +34,38 @@ public class ProductService implements IProductService {
     private ProductMapper productMapper;
 
     @Override
-    public ProductResponse getAllProducts(int pageNumber, int pageSize, String sortBy, String sortOrder) {
+    public ProductResponse getAllProducts(int pageNumber, int pageSize, String sortBy, String sortOrder, String keyword, String category) {
         Sort sortByAndSortOrder = sortOrder.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
 
         Pageable page = PageRequest.of(pageNumber, pageSize, sortByAndSortOrder);
-        Page<Product> pageProducts = productRepository.findAll(page);
+
+        Specification<Product> spec = Specification.where(null);
+        if (keyword != null && !keyword.isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("productName")), "%" + keyword.toLowerCase() + "%")
+            );
+
+        }
+
+        if (category != null && !category.isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.like(root.get("category").get("categoryName"), "%" + category.toLowerCase() + "%")
+            );
+        }
+
+        Page<Product> pageProducts = productRepository.findAll(spec, page);
 
         List<Product> products = pageProducts.getContent();
 
 
-        List<ProductDTO> productDTOList = products.stream()
+        List<ProductDTO> productDTOS = products.stream()
                 .map(product -> productMapper.toProductDTO(product))
                 .toList();
 
         ProductResponse productResponse = new ProductResponse();
-        productResponse.setProducts(productDTOList);
+        productResponse.setProducts(productDTOS);
         productResponse.setPageNumber(pageProducts.getNumber());
         productResponse.setPageSize(pageProducts.getSize());
         productResponse.setTotalElements(pageProducts.getTotalElements());
