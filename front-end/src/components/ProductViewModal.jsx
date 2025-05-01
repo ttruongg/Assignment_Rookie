@@ -12,7 +12,7 @@ function ProductViewModal({ open, setOpen, product, isAvailable }) {
   const {
     productId,
     productName,
-    image,
+    images,
     quantity,
     brand,
     description,
@@ -20,6 +20,8 @@ function ProductViewModal({ open, setOpen, product, isAvailable }) {
     discount,
     specialPrice,
   } = product;
+
+  const productImage = images && images.length > 0 ? images[1].imageUrl : "";
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -40,9 +42,9 @@ function ProductViewModal({ open, setOpen, product, isAvailable }) {
               transition
               className="w-full max-w-md rounded-xl bg-white/5 p-6 backdrop-blur-2xl duration-300 ease-out data-closed:transform-[scale(95%)] data-closed:opacity-0"
             >
-              {image && (
+              {images && (
                 <div className="flex justify-center aspect-[3/2]">
-                  <img src={image} alt={productName} />
+                  <img src={productImage} alt={productName} />
                 </div>
               )}
 
