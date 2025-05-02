@@ -30,7 +30,7 @@ public class ProductController {
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-    @PostMapping("/admin/{categoryId}/product")
+    @PostMapping("public/admin/{categoryId}/product")
     public ResponseEntity<ProductDTO> addProduct(
             @RequestBody @Valid ProductDTO productDTO,
             @PathVariable(name = "categoryId") Long categoryId) {
