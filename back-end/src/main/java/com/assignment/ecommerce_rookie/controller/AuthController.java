@@ -15,26 +15,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-  
+
     @Autowired
     private AuthServiceImpl authServiceImpl;
 
     @PostMapping("/signin")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         return authServiceImpl.login(loginRequest);
-
     }
 
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshAccessToken(HttpServletRequest request) {
         return authServiceImpl.refreshAccessToken(request);
-
     }
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
         return authServiceImpl.signup(signUpRequest);
-
     }
 
     @PostMapping("/logout")
