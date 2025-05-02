@@ -22,9 +22,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import java.util.stream.Collectors;
 
 @Service
@@ -46,7 +48,6 @@ public class ProductServiceImpl implements IProductService {
 
         Pageable page = PageRequest.of(pageNumber, pageSize, sortByAndSortOrder);
 
-
         Specification<Product> spec = Specification.where((root, query, criteriaBuilder) -> {
             root.fetch("categories", JoinType.LEFT);
             query.distinct(true);
@@ -67,7 +68,8 @@ public class ProductServiceImpl implements IProductService {
                 Join<Product, Category> categoriesJoin = root.join("categories", JoinType.LEFT);
                 return criteriaBuilder.like(criteriaBuilder.lower(categoriesJoin.get("categoryName")), "%" + category.toLowerCase() + "%");
             });
-        }
+
+        
 
         Page<Product> pageProducts = productRepository.findAll(spec, page);
 
@@ -133,6 +135,7 @@ public class ProductServiceImpl implements IProductService {
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductDTO(savedProduct);
 
+
     }
 
     @Override
@@ -158,8 +161,6 @@ public class ProductServiceImpl implements IProductService {
 
 
         Product savedProduct = productRepository.save(productDB);
-
-
         return productMapper.toProductDTO(savedProduct);
     }
 
