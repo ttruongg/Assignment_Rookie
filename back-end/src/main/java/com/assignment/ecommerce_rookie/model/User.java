@@ -6,15 +6,21 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "username"),
         @UniqueConstraint(columnNames = "email")
@@ -27,7 +33,7 @@ public class User {
     private Long userId;
 
     @NotBlank
-    @Size(min = 8, message = "Username must contain at least 8 character")
+    @Size(min = 5, message = "Username must contain at least 6 character")
     @Column(name = "userName")
     private String userName;
 
@@ -37,30 +43,45 @@ public class User {
     @Column(name = "email")
     private String email;
 
+    @NotBlank(message = "First Name is required")
+    private String firstName;
+
+    @NotBlank(message = "Last Name is required")
+    private String lastName;
 
     @NotBlank
-    @Size(min = 10)
+    @Size(max = 10)
     @Column(name = "phoneNumber")
     private String phoneNumber;
 
     @NotBlank
-    @Size(max = 50)
     @Column(name = "password")
     private String password;
 
-    public User(String userName, String email, String password) {
+
+    @Getter
+    @Setter
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinColumn(name = "roleId", nullable = false)
+    private Role role;
+
+    public User(String userName, String email, String firstName, String lastName, String phoneNumber, String password, Role role) {
         this.userName = userName;
         this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNumber = phoneNumber;
         this.password = password;
+        this.role = role;
     }
 
-    @Setter
-    @Getter
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
-    @JoinTable(name = "userRole",
-            joinColumns = @JoinColumn(name = "userId"),
-            inverseJoinColumns = @JoinColumn(name = "roleId"))
-    private Set<Role> roles = new HashSet<>();
+    @Column(nullable = false, updatable = false)
+    @CreatedDate
+    private LocalDateTime createdOn;
+
+
+    @LastModifiedDate
+    private LocalDateTime lastUpdatedOn;
 
     @Getter
     @Setter
