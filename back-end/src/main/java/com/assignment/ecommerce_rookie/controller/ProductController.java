@@ -30,41 +30,13 @@ public class ProductController {
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-
     @PostMapping("/admin/product")
     public ResponseEntity<ProductDTO> addProduct(@RequestBody @Valid ProductDTO productDTO) {
+
         ProductDTO savedProduct = productService.addProduct(productDTO);
         return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
     }
 
-
-
-    @GetMapping("/public/{categoryId}/products")
-    public ResponseEntity<ProductResponse> getProductByCategory(
-            @PathVariable(name = "categoryId") Long categoryId,
-            @RequestParam(defaultValue = AppConstants.PAGE_NUMBER) int pageNumber,
-            @RequestParam(defaultValue = AppConstants.PAGE_SIZE) int pageSize,
-            @RequestParam(defaultValue = AppConstants.SORT_PRODUCTS_BY) String sortBy,
-            @RequestParam(defaultValue = AppConstants.SORT_ORDER) String sortOrder
-    ) {
-
-        ProductResponse products = productService.searchByCategory(categoryId, pageNumber, pageSize, sortBy, sortOrder);
-        return new ResponseEntity<>(products, HttpStatus.OK);
-
-    }
-
-    @GetMapping("/public/products/{keyword}")
-    public ResponseEntity<ProductResponse> getProductByKeyWord(
-            @PathVariable String keyword,
-            @RequestParam(defaultValue = AppConstants.PAGE_NUMBER) int pageNumber,
-            @RequestParam(defaultValue = AppConstants.PAGE_SIZE) int pageSize,
-            @RequestParam(defaultValue = AppConstants.SORT_PRODUCTS_BY) String sortBy,
-            @RequestParam(defaultValue = AppConstants.SORT_ORDER) String sortOrder
-    ) {
-        ProductResponse productResponse = productService.searchByKeyWord(keyword, pageNumber, pageSize, sortBy, sortOrder);
-        return new ResponseEntity<>(productResponse, HttpStatus.FOUND);
-
-    }
 
     @PutMapping("/admin/products/{productId}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long productId, @RequestBody ProductDTO productDTO) {
