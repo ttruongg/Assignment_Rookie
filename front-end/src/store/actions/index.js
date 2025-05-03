@@ -33,7 +33,7 @@ export const fetchCategories = () => async (dispatch) => {
         const { data } = await api.get(`/public/categories`);
         dispatch({
             type: "FETCH_CATEGORIES",
-            payload: data.products,
+            payload: data.categories,
             pageNumber: data.pageNumber,
             pageSize: data.pageSize,
             totalElements: data.totalElements,
