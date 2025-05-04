@@ -34,13 +34,6 @@ public class CategoryServiceImpl implements ICategoryService {
                 : Sort.by(sortBy).descending();
 
 
-
-//        if (sortBy.equalsIgnoreCase("asc"))
-//            sortByAndOrder = Sort.by(sortBy).ascending();
-//        else
-//            sortByAndOrder = Sort.by(sortBy).descending();
-
-
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
         Page<Category> categoryPage = categoryRepository.findAll(pageable);
 

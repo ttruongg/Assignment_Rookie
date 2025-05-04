@@ -1,4 +1,4 @@
-package com.assignment.ecommerce_rookie.controller;
+package com.assignment.ecommerce_rookie.controller.web;
 
 import com.assignment.ecommerce_rookie.constants.AppConstants;
 import com.assignment.ecommerce_rookie.dto.ProductDTO;
@@ -11,13 +11,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1/products")
 public class ProductController {
-    @Autowired
-    IProductService productService;
+    private final IProductService productService;
 
+    public ProductController(IProductService productService) {
+        this.productService = productService;
+    }
 
-    @GetMapping("/public/products")
+    @GetMapping
     public ResponseEntity<ProductResponse> getAllProduct(
             @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "category", required = false) String category,
@@ -28,26 +30,6 @@ public class ProductController {
     ) {
         ProductResponse products = productService.getAllProducts(pageNumber, pageSize, sortBy, sortOrder, keyword, category);
         return new ResponseEntity<>(products, HttpStatus.OK);
-    }
-
-    @PostMapping("/admin/product")
-    public ResponseEntity<ProductDTO> addProduct(@RequestBody @Valid ProductDTO productDTO) {
-
-        ProductDTO savedProduct = productService.addProduct(productDTO);
-        return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
-    }
-
-
-    @PutMapping("/admin/products/{productId}")
-    public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long productId, @RequestBody ProductDTO productDTO) {
-        ProductDTO updatedProduct = productService.updateProduct(productDTO, productId);
-        return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
-    }
-
-    @DeleteMapping("/admin/products/{productId}")
-    public ResponseEntity<ProductDTO> deleteProduct(@PathVariable Long productId) {
-        ProductDTO productDTO = productService.deleteProduct(productId);
-        return new ResponseEntity<>(productDTO, HttpStatus.OK);
     }
 
 
