@@ -20,6 +20,7 @@ import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 
 @Component
@@ -41,13 +42,9 @@ public class JwtUtils {
     @Value("${jwt.RefreshTokenCookieName}")
     private String refreshTokenCookie;
 
-    public String getJwtFromCookie(HttpServletRequest request, String cookieName) {
-        Cookie cookie = WebUtils.getCookie(request, cookieName);
-        if (cookie != null) {
-            return cookie.getValue();
-        } else {
-            return null;
-        }
+    public Optional<String> getJwtFromCookie(HttpServletRequest request, String cookieName) {
+        return Optional.ofNullable(WebUtils.getCookie(request, cookieName))
+                .map(Cookie::getValue);
     }
 
 

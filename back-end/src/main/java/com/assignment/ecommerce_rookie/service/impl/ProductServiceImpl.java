@@ -29,14 +29,20 @@ import java.util.stream.Collectors;
 
 @Service
 public class ProductServiceImpl implements IProductService {
-    @Autowired
-    private ProductRepository productRepository;
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
-    @Autowired
-    private ProductMapper productMapper;
+
+    private final CategoryRepository categoryRepository;
+
+
+    private final ProductMapper productMapper;
+
+    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository, ProductMapper productMapper) {
+        this.productRepository = productRepository;
+        this.categoryRepository = categoryRepository;
+        this.productMapper = productMapper;
+    }
 
     @Override
     public ProductResponse getAllProducts(int pageNumber, int pageSize, String sortBy, String sortOrder, String keyword, String category) {
@@ -135,6 +141,7 @@ public class ProductServiceImpl implements IProductService {
 
     }
 
+    @Transactional
     @Override
     public ProductDTO updateProduct(ProductDTO productDTO, Long productId) {
         Product productDB = productRepository.findById(productId)
@@ -163,6 +170,7 @@ public class ProductServiceImpl implements IProductService {
         return productMapper.toProductDTO(savedProduct);
     }
 
+    @Transactional
     @Override
     public ProductDTO deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)

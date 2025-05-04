@@ -65,7 +65,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     }
 
     private String parseJwt(HttpServletRequest request) {
-        String jwt = jwtUtils.getJwtFromCookie(request, accessTokenCookie);
+        String jwt = jwtUtils.getJwtFromCookie(request, accessTokenCookie).orElse(null);
         logger.debug("AuthTokenFilter.java: {}", jwt);
         return jwt;
     }
