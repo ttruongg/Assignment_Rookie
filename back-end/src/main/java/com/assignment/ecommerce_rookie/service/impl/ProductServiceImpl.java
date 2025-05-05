@@ -22,10 +22,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.assignment.ecommerce_rookie.constants.AppConstants.DISCOUNT_PERCENT_DIVISOR;
 
 @Service
 public class ProductServiceImpl implements IProductService {
@@ -46,53 +50,67 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public ProductResponse getAllProducts(int pageNumber, int pageSize, String sortBy, String sortOrder, String keyword, String category) {
-        Sort sortByAndSortOrder = sortOrder.equalsIgnoreCase("asc")
-                ? Sort.by(sortBy).ascending()
-                : Sort.by(sortBy).descending();
+        Pageable pageable = createPageable(pageNumber, pageSize, sortBy, sortOrder);
+        Specification<Product> specification = createProductSpecification(keyword, category);
 
-        Pageable page = PageRequest.of(pageNumber, pageSize, sortByAndSortOrder);
+        Page<Product> productsPage = productRepository.findAll(specification, pageable);
+        List<ProductDTO> productDTOs = convertToProductDTOs(productsPage.getContent());
 
+        return buildProductResponse(productsPage, productDTOs);
 
-        Specification<Product> spec = Specification.where((root, query, criteriaBuilder) -> {
+    }
+
+    private Pageable createPageable(int pageNumber, int pageSize, String sortBy, String sortOrder) {
+        Sort sort = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+        return PageRequest.of(pageNumber, pageSize, sort);
+    }
+
+    private Specification<Product> createProductSpecification(String keyword, String category) {
+        return Specification.where(fetchCategories())
+                .and(applyKeywordFilter(keyword))
+                .and(applyCategoryFilter(category));
+    }
+
+    private Specification<Product> fetchCategories() {
+        return (root, query, cb) -> {
             root.fetch("categories", JoinType.LEFT);
             query.distinct(true);
-            return criteriaBuilder.conjunction();
-        });
+            return cb.conjunction();
+        };
+    }
 
-
-        if (keyword != null && !keyword.isEmpty()) {
-            spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("productName")), "%" + keyword.toLowerCase() + "%")
-            );
-
+    private Specification<Product> applyKeywordFilter(String keyword) {
+        if (keyword == null || keyword.isEmpty()) {
+            return null;
         }
+        return (root, query, cb) -> cb.like(cb.lower(root.get("productName")), "%" + keyword.toLowerCase() + "%");
+    }
 
-
-        if (category != null && !category.isEmpty()) {
-            spec = spec.and((root, query, criteriaBuilder) -> {
-                Join<Product, Category> categoriesJoin = root.join("categories", JoinType.LEFT);
-                return criteriaBuilder.like(criteriaBuilder.lower(categoriesJoin.get("categoryName")), "%" + category.toLowerCase() + "%");
-            });
-        }
-
-        Page<Product> pageProducts = productRepository.findAll(spec, page);
-
-        List<Product> products = pageProducts.getContent();
-
-
-        List<ProductDTO> productDTOS = products.stream()
-                .map(product -> productMapper.toProductDTO(product))
+    private List<ProductDTO> convertToProductDTOs(List<Product> products) {
+        return products.stream()
+                .map(productMapper::toProductDTO)
                 .toList();
+    }
 
-        ProductResponse productResponse = new ProductResponse();
-        productResponse.setProducts(productDTOS);
-        productResponse.setPageNumber(pageProducts.getNumber());
-        productResponse.setPageSize(pageProducts.getSize());
-        productResponse.setTotalElements(pageProducts.getTotalElements());
-        productResponse.setLastPage(pageProducts.isLast());
-        productResponse.setTotalPages(pageProducts.getTotalPages());
+    private Specification<Product> applyCategoryFilter(String category) {
+        if (category == null || category.isEmpty()) {
+            return null;
+        }
+        return (root, query, cb) -> {
+            Join<Product, Category> categoriesJoin = root.join("categories", JoinType.LEFT);
+            return cb.like(cb.lower(categoriesJoin.get("categoryName")), "%" + category.toLowerCase() + "%");
+        };
+    }
 
-        return productResponse;
+    private ProductResponse buildProductResponse(Page<Product> productsPage, List<ProductDTO> productDTOs) {
+        ProductResponse response = new ProductResponse();
+        response.setProducts(productDTOs);
+        response.setPageNumber(productsPage.getNumber());
+        response.setPageSize(productsPage.getSize());
+        response.setTotalElements(productsPage.getTotalElements());
+        response.setLastPage(productsPage.isLast());
+        response.setTotalPages(productsPage.getTotalPages());
+        return response;
     }
 
     @Override
@@ -124,21 +142,33 @@ public class ProductServiceImpl implements IProductService {
         Product product = productMapper.toProduct(productDTO);
         product.setCategories(categories);
 
-        List<ProductImage> images = productDTO.getImages().stream().map(url -> {
-            ProductImage img = new ProductImage();
-            img.setImageUrl(url.getImageUrl());
-            img.setProduct(product);
-            return img;
-        }).collect(Collectors.toList());
+        List<ProductImage> images = mapProductImages(productDTO.getImages(), product);
 
         product.setImages(images);
 
-        double specialPrice = product.getPrice() - (product.getDiscount() * 0.01) * product.getPrice();
-        product.setSpecialPrice(specialPrice);
+        BigDecimal specialPrice = calculateSpecialPrice(product.getPrice(), product.getDiscount());
+        product.setSpecialPrice(specialPrice.doubleValue());
 
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductDTO(savedProduct);
 
+    }
+
+    private List<ProductImage> mapProductImages(List<ProductImage> images, Product product) {
+        return images.stream()
+                .map(dto -> {
+                    ProductImage img = new ProductImage();
+                    img.setImageUrl(dto.getImageUrl());
+                    img.setProduct(product);
+                    return img;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private BigDecimal calculateSpecialPrice(double price, double discountPercentage) {
+        BigDecimal priceBD = BigDecimal.valueOf(price);
+        BigDecimal discountBD = BigDecimal.valueOf(discountPercentage).divide(DISCOUNT_PERCENT_DIVISOR, 2, RoundingMode.HALF_UP);
+        return priceBD.subtract(priceBD.multiply(discountBD)).setScale(2, RoundingMode.HALF_UP);
     }
 
     @Transactional

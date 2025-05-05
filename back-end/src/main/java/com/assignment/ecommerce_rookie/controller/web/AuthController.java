@@ -1,4 +1,4 @@
-package com.assignment.ecommerce_rookie.controller;
+package com.assignment.ecommerce_rookie.controller.web;
 
 import com.assignment.ecommerce_rookie.security.jwt.JwtUtils;
 import com.assignment.ecommerce_rookie.security.request.LoginRequest;

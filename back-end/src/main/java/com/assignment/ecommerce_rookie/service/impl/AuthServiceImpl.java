@@ -46,8 +46,6 @@ public class AuthServiceImpl implements IAuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder encoder;
 
-
-
     @Value("${jwt.RefreshTokenCookieName}")
     private String refreshTokenCookie;
 

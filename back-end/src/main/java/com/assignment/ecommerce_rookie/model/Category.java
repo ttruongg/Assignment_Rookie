@@ -29,7 +29,7 @@ public class Category {
     @Size(min = 5, message = "Description must be at least 5 characters")
     private String description;
 
-    @ManyToMany(mappedBy = "categories", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToMany(mappedBy = "categories")
     private Set<Product> products;
 
 

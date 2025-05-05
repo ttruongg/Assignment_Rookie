@@ -18,7 +18,8 @@ import java.util.Set;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users", uniqueConstraints = {
@@ -59,9 +60,7 @@ public class User {
     private String password;
 
 
-    @Getter
-    @Setter
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "roleId", nullable = false)
     private Role role;
 
@@ -85,7 +84,7 @@ public class User {
 
     @Getter
     @Setter
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "user")
     private List<Address> addresses = new ArrayList<>();
 
     @ToString.Exclude
