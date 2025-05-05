@@ -23,7 +23,7 @@ public interface ProductMapper {
             return new HashSet<>();
         }
         return categories.stream()
-                .map(Category::getCategoryId)
+                .map(Category::getId)
                 .collect(Collectors.toSet());
     }
 }

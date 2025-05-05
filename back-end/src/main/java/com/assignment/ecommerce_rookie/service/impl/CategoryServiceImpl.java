@@ -91,7 +91,7 @@ public class CategoryServiceImpl implements ICategoryService {
                 .orElseThrow(() -> new NotFoundException("Category", "categoryId", categoryId));
 
         Category category = categoryMapper.toCategory(categoryDTO);
-        category.setCategoryId(categoryId);
+        category.setId(categoryId);
         categoryDB = categoryRepository.save(category);
 
         return categoryMapper.toCategoryDTO(categoryDB);

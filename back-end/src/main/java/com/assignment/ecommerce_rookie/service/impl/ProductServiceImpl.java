@@ -147,7 +147,7 @@ public class ProductServiceImpl implements IProductService {
         product.setImages(images);
 
         BigDecimal specialPrice = calculateSpecialPrice(product.getPrice(), product.getDiscount());
-        product.setSpecialPrice(specialPrice.doubleValue());
+        product.setSpecialPrice(specialPrice);
 
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductDTO(savedProduct);
@@ -165,8 +165,8 @@ public class ProductServiceImpl implements IProductService {
                 .collect(Collectors.toList());
     }
 
-    private BigDecimal calculateSpecialPrice(double price, double discountPercentage) {
-        BigDecimal priceBD = BigDecimal.valueOf(price);
+    private BigDecimal calculateSpecialPrice(BigDecimal price, double discountPercentage) {
+        BigDecimal priceBD = price;
         BigDecimal discountBD = BigDecimal.valueOf(discountPercentage).divide(DISCOUNT_PERCENT_DIVISOR, 2, RoundingMode.HALF_UP);
         return priceBD.subtract(priceBD.multiply(discountBD)).setScale(2, RoundingMode.HALF_UP);
     }

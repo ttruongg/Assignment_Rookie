@@ -15,8 +15,7 @@ public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "roleId")
-    private int roleId;
+    private int id;
 
     @ToString.Exclude
     @Enumerated(EnumType.STRING)

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,9 +17,9 @@ import java.util.List;
 public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long cartId;
+    private long id;
 
-    private double totalPrice;
+    private BigDecimal totalPrice;
 
     @OneToOne
     @JoinColumn(name = "userId")

@@ -36,11 +36,11 @@ class categoryServiceImplTest {
         category.setCategoryName("Category");
 
         Category savedCategory = new Category();
-        savedCategory.setCategoryId(1L);
+        savedCategory.setId(1L);
         savedCategory.setCategoryName("Category");
 
         CategoryDTO savedCategoryDTO = new CategoryDTO();
-        savedCategoryDTO.setCategoryId(1L);
+        savedCategoryDTO.setId(1L);
         savedCategoryDTO.setCategoryName("Category");
 
         when(categoryMapper.toCategory(categoryDTO)).thenReturn(category);
@@ -53,7 +53,7 @@ class categoryServiceImplTest {
 
 
         assertNotNull(result);
-        assertEquals(1L, result.getCategoryId());
+        assertEquals(1L, result.getId());
         assertEquals("Category", result.getCategoryName());
 
         verify(categoryMapper).toCategory(categoryDTO);

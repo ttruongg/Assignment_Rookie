@@ -32,8 +32,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -109,12 +111,34 @@ public class AuthServiceImpl implements IAuthService {
             throw new APIException("Email is already in use");
         }
 
-        AppRole roleToFind = Optional.ofNullable(signUpRequest.getRole())
-                .map(role -> AppRole.valueOf(role))
-                .orElse(AppRole.USER);
+//        AppRole roleToFind = Optional.ofNullable(signUpRequest.getRole())
+//                .map(role -> AppRole.valueOf(role))
+//                .orElse(AppRole.USER);
+//
+//        Role userRole = roleRepository.findByRoleName(roleToFind)
+//                .orElseThrow(() -> new APIException("Role not found: " + roleToFind, HttpStatus.NOT_FOUND));
 
-        Role userRole = roleRepository.findByRoleName(roleToFind)
-                .orElseThrow(() -> new APIException("Role not found: " + roleToFind, HttpStatus.NOT_FOUND));
+        Set<String> roleNamesFromRequest = signUpRequest.getRole();
+        Set<Role> userRoles = new HashSet<>();
+
+
+        if (roleNamesFromRequest == null || roleNamesFromRequest.isEmpty()) {
+            Role userRole = roleRepository.findByRoleName(AppRole.USER)
+                    .orElseThrow(() -> new APIException("Error: Default USER Role not found in DB.", HttpStatus.INTERNAL_SERVER_ERROR));
+            userRoles.add(userRole);
+        } else {
+            roleNamesFromRequest.forEach(roleName -> {
+
+                AppRole roleToFind = AppRole.valueOf(roleName);
+
+                Role role = roleRepository.findByRoleName(roleToFind)
+                        .orElseThrow(() -> new APIException("Role not found: " + roleName, HttpStatus.NOT_FOUND));
+
+                userRoles.add(role);
+            });
+
+        }
+
 
         User user = new User(
                 signUpRequest.getUserName(),
@@ -123,7 +147,7 @@ public class AuthServiceImpl implements IAuthService {
                 signUpRequest.getLastName(),
                 signUpRequest.getPhoneNumber(),
                 encoder.encode(signUpRequest.getPassword()),
-                userRole
+                userRoles
         );
 
         userRepository.save(user);
