@@ -23,12 +23,13 @@ public class ProductController {
     public ResponseEntity<ProductResponse> getAllProduct(
             @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "category", required = false) String category,
+            @RequestParam(name ="featured", required = false) Boolean featured,
             @RequestParam(defaultValue = AppConstants.PAGE_NUMBER) int pageNumber,
             @RequestParam(defaultValue = AppConstants.PAGE_SIZE) int pageSize,
             @RequestParam(defaultValue = AppConstants.SORT_PRODUCTS_BY) String sortBy,
             @RequestParam(defaultValue = AppConstants.SORT_ORDER) String sortOrder
     ) {
-        ProductResponse products = productService.getAllProducts(pageNumber, pageSize, sortBy, sortOrder, keyword, category);
+        ProductResponse products = productService.getAllProducts(pageNumber, pageSize, sortBy, sortOrder, keyword, category, featured);
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
