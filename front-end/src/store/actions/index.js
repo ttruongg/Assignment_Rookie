@@ -4,7 +4,7 @@ export const fetchProducts = (queryString) => async (dispatch) => {
     try {
 
         dispatch({ type: "IS_FETCHING" })
-        const { data } = await api.get(`/public/products?${queryString}`);
+        const { data } = await api.get(`/products?${queryString}`);
         dispatch({
             type: "FETCH_PRODUCTS",
             payload: data.products,
@@ -30,7 +30,7 @@ export const fetchCategories = () => async (dispatch) => {
     try {
 
         dispatch({ type: "LOADING_CATEGORY" })
-        const { data } = await api.get(`/public/categories`);
+        const { data } = await api.get(`/categories`);
         dispatch({
             type: "FETCH_CATEGORIES",
             payload: data.categories,

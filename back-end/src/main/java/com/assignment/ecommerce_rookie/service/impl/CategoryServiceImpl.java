@@ -8,6 +8,7 @@ import com.assignment.ecommerce_rookie.mapper.CategoryMapper;
 import com.assignment.ecommerce_rookie.model.Category;
 import com.assignment.ecommerce_rookie.repository.CategoryRepository;
 import com.assignment.ecommerce_rookie.service.ICategoryService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,13 +33,6 @@ public class CategoryServiceImpl implements ICategoryService {
         Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
-
-
-
-//        if (sortBy.equalsIgnoreCase("asc"))
-//            sortByAndOrder = Sort.by(sortBy).ascending();
-//        else
-//            sortByAndOrder = Sort.by(sortBy).descending();
 
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
@@ -66,6 +60,7 @@ public class CategoryServiceImpl implements ICategoryService {
         return categoryResponse;
     }
 
+    @Transactional
     @Override
     public CategoryDTO createCategory(CategoryDTO categoryDTO) {
         Category category = categoryMapper.toCategory(categoryDTO);
@@ -79,6 +74,7 @@ public class CategoryServiceImpl implements ICategoryService {
         return categoryMapper.toCategoryDTO(savedCategory);
     }
 
+    @Transactional
     @Override
     public CategoryDTO deleteCategory(Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
@@ -88,13 +84,14 @@ public class CategoryServiceImpl implements ICategoryService {
         return categoryMapper.toCategoryDTO(category);
     }
 
+    @Transactional
     @Override
     public CategoryDTO updateCategory(CategoryDTO categoryDTO, Long categoryId) {
         Category categoryDB = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException("Category", "categoryId", categoryId));
 
         Category category = categoryMapper.toCategory(categoryDTO);
-        category.setCategoryId(categoryId);
+        category.setId(categoryId);
         categoryDB = categoryRepository.save(category);
 
         return categoryMapper.toCategoryDTO(categoryDB);

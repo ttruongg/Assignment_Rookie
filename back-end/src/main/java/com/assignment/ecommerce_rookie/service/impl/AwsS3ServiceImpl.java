@@ -1,4 +1,4 @@
-package com.assignment.ecommerce_rookie.service;
+package com.assignment.ecommerce_rookie.service.impl;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -8,6 +8,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.assignment.ecommerce_rookie.exception.APIException;
+import com.assignment.ecommerce_rookie.service.IAwsS3Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,7 +18,7 @@ import java.io.InputStream;
 
 
 @Service
-public class AwsS3Service {
+public class AwsS3ServiceImpl implements IAwsS3Service {
 
     private final String bucketName = "ecommerce-rookie";
     @Value("${aws.s3.access.key}")
@@ -26,6 +27,7 @@ public class AwsS3Service {
     @Value("${aws.s3.secret.key}")
     private String awsS3SecretKey;
 
+    @Override
     public String saveImageToS3(MultipartFile photo) {
         String s3LocationImage = null;
 

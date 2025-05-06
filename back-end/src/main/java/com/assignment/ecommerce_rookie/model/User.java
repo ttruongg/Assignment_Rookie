@@ -18,7 +18,8 @@ import java.util.Set;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users", uniqueConstraints = {
@@ -29,8 +30,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "userId")
-    private Long userId;
+    private Long id;
 
     @NotBlank
     @Size(min = 5, message = "Username must contain at least 6 character")
@@ -59,20 +59,22 @@ public class User {
     private String password;
 
 
-    @Getter
-    @Setter
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinColumn(name = "roleId", nullable = false)
-    private Role role;
+    @ManyToMany
+    @JoinTable(
+            name = "user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
 
-    public User(String userName, String email, String firstName, String lastName, String phoneNumber, String password, Role role) {
+    public User(String userName, String email, String firstName, String lastName, String phoneNumber, String password, Set<Role> roles) {
         this.userName = userName;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.phoneNumber = phoneNumber;
         this.password = password;
-        this.role = role;
+        this.roles = roles;
     }
 
     @Column(nullable = false, updatable = false)
@@ -83,9 +85,7 @@ public class User {
     @LastModifiedDate
     private LocalDateTime lastUpdatedOn;
 
-    @Getter
-    @Setter
-    @OneToMany(mappedBy = "user", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "user")
     private List<Address> addresses = new ArrayList<>();
 
     @ToString.Exclude

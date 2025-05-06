@@ -1,11 +1,22 @@
 package com.assignment.ecommerce_rookie.exception;
 
+import org.springframework.http.HttpStatus;
+
 public class APIException extends RuntimeException{
 
-    public APIException() {
-    }
+    private final HttpStatus status;
 
     public APIException(String message) {
         super(message);
+        this.status = HttpStatus.BAD_REQUEST;
+    }
+
+    public APIException(String message, HttpStatus status) {
+        super(message);
+        this.status = status;
+    }
+
+    public HttpStatus getStatus() {
+        return status;
     }
 }

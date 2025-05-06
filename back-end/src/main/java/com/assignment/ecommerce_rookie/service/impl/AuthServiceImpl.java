@@ -1,5 +1,6 @@
 package com.assignment.ecommerce_rookie.service.impl;
 
+import com.assignment.ecommerce_rookie.exception.APIException;
 import com.assignment.ecommerce_rookie.model.AppRole;
 import com.assignment.ecommerce_rookie.model.Role;
 import com.assignment.ecommerce_rookie.model.User;
@@ -11,7 +12,9 @@ import com.assignment.ecommerce_rookie.security.request.SignUpRequest;
 import com.assignment.ecommerce_rookie.security.response.MessageResponse;
 import com.assignment.ecommerce_rookie.security.response.UserInfoResponse;
 import com.assignment.ecommerce_rookie.security.services.UserDetailsImpl;
+import com.assignment.ecommerce_rookie.service.IAuthService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -29,117 +32,113 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
-public class AuthServiceImpl {
+public class AuthServiceImpl implements IAuthService {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JwtUtils jwtUtils;
-
-    @Autowired
-    private UserDetailsService userDetailsService;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
+    private final UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder encoder;
 
     @Value("${jwt.RefreshTokenCookieName}")
     private String refreshTokenCookie;
 
-    @Autowired
-    PasswordEncoder encoder;
-
-
-    public ResponseEntity<?> login(LoginRequest loginRequest) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassword()));
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
-            ResponseCookie accessTokenCookie = jwtUtils.generateAccessTokenCookie(userDetails);
-            ResponseCookie refreshTokenCookie = jwtUtils.generateRefreshTokenCookie(userDetails);
-
-            List<String> roles = userDetails.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toList());
-
-            UserInfoResponse response = new UserInfoResponse(
-                    userDetails.getId(),
-                    userDetails.getUsername(),
-                    roles
-            );
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
-                    .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-                    .body(response);
-
-        } catch (AuthenticationException exception) {
-            return new ResponseEntity<>(new MessageResponse("Bad credentials"), HttpStatus.UNAUTHORIZED);
-        }
+    public AuthServiceImpl(AuthenticationManager authenticationManager, JwtUtils jwtUtils, UserDetailsService userDetailsService,
+                           UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder encoder) {
+        this.authenticationManager = authenticationManager;
+        this.jwtUtils = jwtUtils;
+        this.userDetailsService = userDetailsService;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.encoder = encoder;
     }
 
+    @Override
+    public UserInfoResponse login(LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassword()));
 
-    public ResponseEntity<?> refreshAccessToken(HttpServletRequest request) {
-        try {
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-            String refreshToken = jwtUtils.getJwtFromCookie(request, refreshTokenCookie);
-
-
-            if (refreshToken == null || !jwtUtils.validateJwtToken(refreshToken)) {
-                return new ResponseEntity<>(new MessageResponse("Invalid refresh token"), HttpStatus.UNAUTHORIZED);
-            }
-
-
-            String username = jwtUtils.getUserNameFromJwtToken(refreshToken);
-
-
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-
-
-            ResponseCookie accessTokenCookie = jwtUtils.generateAccessTokenCookie((UserDetailsImpl) userDetails);
-
-
-            return new ResponseEntity<>(new MessageResponse("Access token refreshed"), HttpStatus.OK);
-
-        } catch (Exception exception) {
-            return new ResponseEntity<>(new MessageResponse("Failed to refresh token"), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        return new UserInfoResponse(
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toList())
+        );
     }
 
-    public ResponseEntity<?> signup(SignUpRequest signUpRequest) {
+    @Override
+    public UserInfoResponse refreshAccessToken(String refreshToken) {
+        return Optional.ofNullable(refreshToken)
+                .filter(jwtUtils::validateJwtToken)
+                .map(jwtUtils::getUserNameFromJwtToken)
+                .map(userDetailsService::loadUserByUsername)
+                .map(user -> {
+                    SecurityContextHolder.getContext().setAuthentication(
+                            new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities())
+                    );
+                    return (UserDetailsImpl) user;
+                })
+                .map(user -> new UserInfoResponse(
+                        user.getId(),
+                        user.getUsername(),
+                        user.getAuthorities().stream()
+                                .map(GrantedAuthority::getAuthority)
+                                .collect(Collectors.toList())
+                ))
+                .orElseThrow(() -> new APIException("Invalid or missing refresh token", HttpStatus.UNAUTHORIZED));
+    }
+
+    @Transactional
+    @Override
+    public void signup(SignUpRequest signUpRequest) {
         if (userRepository.existsByUserName(signUpRequest.getUserName())) {
-            return new ResponseEntity<>(new MessageResponse("Username is already taken"), HttpStatus.BAD_REQUEST);
+            throw new APIException("Username is already taken");
         }
 
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return new ResponseEntity<>(new MessageResponse("Email is already in use"), HttpStatus.BAD_REQUEST);
+            throw new APIException("Email is already in use");
         }
 
-        String strRole = signUpRequest.getRole();
+//        AppRole roleToFind = Optional.ofNullable(signUpRequest.getRole())
+//                .map(role -> AppRole.valueOf(role))
+//                .orElse(AppRole.USER);
+//
+//        Role userRole = roleRepository.findByRoleName(roleToFind)
+//                .orElseThrow(() -> new APIException("Role not found: " + roleToFind, HttpStatus.NOT_FOUND));
 
-        Role userRole = new Role();
-        if (strRole == null) {
-            userRole = roleRepository.findByRoleName(AppRole.USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        Set<String> roleNamesFromRequest = signUpRequest.getRole();
+        Set<Role> userRoles = new HashSet<>();
 
+
+        if (roleNamesFromRequest == null || roleNamesFromRequest.isEmpty()) {
+            Role userRole = roleRepository.findByRoleName(AppRole.USER)
+                    .orElseThrow(() -> new APIException("Error: Default USER Role not found in DB.", HttpStatus.INTERNAL_SERVER_ERROR));
+            userRoles.add(userRole);
         } else {
-            userRole = roleRepository.findByRoleName(AppRole.ADMIN)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+            roleNamesFromRequest.forEach(roleName -> {
+
+                AppRole roleToFind = AppRole.valueOf(roleName);
+
+                Role role = roleRepository.findByRoleName(roleToFind)
+                        .orElseThrow(() -> new APIException("Role not found: " + roleName, HttpStatus.NOT_FOUND));
+
+                userRoles.add(role);
+            });
+
         }
+
 
         User user = new User(
                 signUpRequest.getUserName(),
@@ -148,23 +147,16 @@ public class AuthServiceImpl {
                 signUpRequest.getLastName(),
                 signUpRequest.getPhoneNumber(),
                 encoder.encode(signUpRequest.getPassword()),
-                userRole
+                userRoles
         );
 
-
         userRepository.save(user);
-
-        return new ResponseEntity<>(new MessageResponse("User registered successfully!"), HttpStatus.CREATED);
     }
 
-    public ResponseEntity<?> logout() {
-        ResponseCookie accessTokenCookie = jwtUtils.cleanAccessTokenCookie();
-        ResponseCookie refreshTokenCookie = jwtUtils.cleanRefreshTokenCookie();
+    @Override
+    public void logout() {
         SecurityContextHolder.clearContext();
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-                .body(new MessageResponse("User logged out successfully!"));
     }
+
 
 }

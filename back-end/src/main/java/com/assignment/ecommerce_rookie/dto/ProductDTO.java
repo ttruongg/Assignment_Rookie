@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -15,15 +16,15 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductDTO {
-    private Long productId;
+    private Long id;
     private String productName;
     private List<ProductImage> images;
     private String brand;
     private String description;
     private int quantity;
-    private double price;
+    private BigDecimal price;
     private double discount;
-    private double specialPrice;
+    private BigDecimal specialPrice;
     private boolean featured;
     private LocalDateTime createdOn;
     private LocalDateTime lastUpdatedOn;
