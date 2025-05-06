@@ -1,6 +1,8 @@
 const initialState = {
     products: null,
     categories: null,
+    featuredProducts: null,
+    featuredPagination: {},
     pagination: {}
 };
 
@@ -12,6 +14,18 @@ export const productReducer = (state = initialState, action) => {
                 products: action.payload,
                 pagination: {
                     ...state.pagination,
+                    pageNumber: action.pageNumber,
+                    pageSize: action.pageSize,
+                    totalElements: action.totalElements,
+                    totalPages: action.totalPages,
+                    lastPage: action.lastPage,
+                },
+            };
+        case "FETCH_FEATURED_PRODUCTS":
+            return {
+                ...state,
+                featuredProducts: action.payload,
+                featuredPagination: {
                     pageNumber: action.pageNumber,
                     pageSize: action.pageSize,
                     totalElements: action.totalElements,

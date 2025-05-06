@@ -51,5 +51,28 @@ export const fetchCategories = () => async (dispatch) => {
     }
 }
 
+export const fetchFeaturedProducts = () => async (dispatch) => {
+    try {
+        dispatch({ type: "IS_FETCHING" });
+        const { data } = await api.get(`/products?pageNumber=0&pageSize=8&featured=true`);
+        dispatch({
+            type: "FETCH_FEATURED_PRODUCTS",
+            payload: data.products,
+            pageNumber: data.pageNumber,
+            pageSize: data.pageSize,
+            totalElements: data.totalElements,
+            totalPages: data.totalPages,
+            lastPage: data.lastPage,
+        });
+        dispatch({ type: "IS_FETCHED" });
+    } catch (error) {
+        console.log(error);
+        dispatch({
+            type: "IS_ERROR",
+            payload: error?.response?.data?.message || "Failed to fetch featured products",
+        });
+    }
+};
+
 
 
