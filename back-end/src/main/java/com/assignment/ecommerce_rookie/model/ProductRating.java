@@ -5,10 +5,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "productRating", uniqueConstraints = {@UniqueConstraint(columnNames = {"userId", "productId"})})
 @Getter
 @Setter
@@ -22,28 +26,22 @@ public class ProductRating {
 
     @MapsId("userId")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @MapsId("productId")
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "productId", nullable = false)
+    @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
 
+    @Column(nullable = false, updatable = false)
+    @CreatedDate
     private LocalDateTime created_at;
+
+    @LastModifiedDate
     private LocalDateTime updated_at;
 
 
-    @PrePersist
-    protected void onCreate() {
-        this.created_at = LocalDateTime.now();
-        this.updated_at = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updated_at = LocalDateTime.now();
-    }
 
 }
