@@ -60,6 +60,13 @@ public class ProductServiceImpl implements IProductService {
 
     }
 
+    @Override
+    public ProductDTO getProductById(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product", "productId", productId));
+        return productMapper.toProductDTO(product);
+    }
+
     private Pageable createPageable(int pageNumber, int pageSize, String sortBy, String sortOrder) {
         Sort sort = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         return PageRequest.of(pageNumber, pageSize, sort);
