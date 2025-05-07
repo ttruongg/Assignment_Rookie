@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
 import ProductViewModal from "./ProductViewModal";
+import { useNavigate } from "react-router-dom";
 const ProductCard = ({
-  productId,
+  id,
   productName,
   images,
   quantity,
@@ -25,6 +26,8 @@ const ProductCard = ({
     setSelectedViewProduct(product);
     setOpenProductViewModal(true);
   };
+
+  const navigate = useNavigate();
 
   return (
     <div className="border rounded-lg shadow-xl overflow-hidden transition-shadow duration-300">
@@ -90,7 +93,7 @@ const ProductCard = ({
           )}
 
           <button
-            onClick={() => {}}
+            onClick={() => navigate(`/product/${id}`)}
             className="bg-blue-600 text-white py-2 px-3 rounded-lg items-center transition-colors duration-300 w-30 flex justify-center opacity-100 hover:bg-blue-800"
           >
             View Product

@@ -19,13 +19,13 @@ const UserMenu = () => {
     setAnchorEl(null);
   };
 
-  
+  const logOutHandler = () => {
+    dispatch(logOutUser(navigate));
+  };
 
   return (
     <div className="">
-      <div
-        onClick={handleClick}
-      >
+      <div onClick={handleClick}>
         <Avatar alt="Menu" src="" />
       </div>
       <Menu

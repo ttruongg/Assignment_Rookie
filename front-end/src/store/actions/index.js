@@ -1,4 +1,3 @@
-import axios from "axios";
 import api from "../../api/api";
 export const fetchProducts = (queryString) => async (dispatch) => {
     try {
@@ -80,11 +79,12 @@ export const authenticateSignInUser
         try {
             setLoader(true);
             const { data } = await api.post("/auth/signin", sendData);
+            console.log("API response data:", data);
             dispatch({ type: "LOGIN_USER", payload: data });
             localStorage.setItem("auth", JSON.stringify(data));
             reset();
+            console.log("Login successful, showing toast...");
             toast.success("Login Success");
-            navigate("/");
         } catch (error) {
             console.log(error);
             toast.error(error?.response?.data?.message || "Internal Server Error");
@@ -92,3 +92,31 @@ export const authenticateSignInUser
             setLoader(false);
         }
     }
+
+
+export const fetchProductById = (id) => async (dispatch) => {
+    dispatch({ type: "FETCH_PRODUCT_REQUEST" });
+
+    try {
+        const { data } = await api.get(`/products/${id}`);
+        dispatch({ type: "FETCH_PRODUCT_SUCCESS", payload: data });
+    } catch (error) {
+        dispatch({
+            type: "FETCH_PRODUCT_FAILURE",
+            payload: error.response?.data?.message || "Failed to fetch product details",
+        });
+    }
+};
+
+export const createCategory = (categoryData, toast) => async (dispatch) => {
+    try {
+        const { data } = await api.post("/admin/categories", categoryData, {
+            withCredentials: true,
+        });
+        dispatch({ type: "CREATE_CATEGORY", payload: data });
+        toast.success("Category created successfully!");
+    } catch (error) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || "Failed to create category");
+    }
+};

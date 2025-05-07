@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineLogin } from "react-icons/ai";
 import InputField from "../shared/Inputfiels";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { authenticateSignInUser } from "../../store/actions";
 import toast from "react-hot-toast";
 
@@ -11,6 +11,7 @@ const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [loader, setLoader] = useState(false);
+  const { user } = useSelector((state) => state.auth);
 
   const {
     register,
@@ -22,11 +23,16 @@ const Login = () => {
   });
 
   const loginHandler = async (data) => {
-    console.log("Login Click");
-    console.log(data);
-    dispatch(authenticateSignInUser(data, toast, reset, navigate, setLoader))
-    
+    dispatch(authenticateSignInUser(data, toast, reset, navigate, setLoader));
   };
+
+  useEffect(() => {
+    if (user?.roles?.includes("ADMIN")) {
+      navigate("/admin");
+    } else if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex justify-center items-center">
