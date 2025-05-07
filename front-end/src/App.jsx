@@ -10,8 +10,9 @@ import ProductPage from "./components/products/ProductPage";
 import UserLayout from "./components/layouts/UserLayout";
 import AdminLayout from "./components/layouts/AdminLayout";
 import Admin from "./components/admin/Admin";
-import CategoryAdmin from "./components/admin/components/CategoryAdmin";
+
 import { Toaster } from "react-hot-toast";
+import CategoryAdmin from "./components/admin/components/Category/CategoryAdmin";
 function App() {
   return (
     <Router>
@@ -24,7 +25,11 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/product/:id" element={<ProductPage />} />
-          <Route path="/login" element={<Login />} />
+
+          <Route element={<PrivateRoute publicPage />}>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+          </Route>
         </Route>
 
         <Route element={<PrivateRoute adminOnly />}>

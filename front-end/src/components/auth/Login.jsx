@@ -26,13 +26,6 @@ const Login = () => {
     dispatch(authenticateSignInUser(data, toast, reset, navigate, setLoader));
   };
 
-  useEffect(() => {
-    if (user?.roles?.includes("ADMIN")) {
-      navigate("/admin");
-    } else if (user) {
-      navigate("/");
-    }
-  }, [user, navigate]);
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex justify-center items-center">

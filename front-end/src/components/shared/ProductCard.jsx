@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { FaCartShopping } from "react-icons/fa6";
-import ProductViewModal from "./ProductViewModal";
 import { useNavigate } from "react-router-dom";
 const ProductCard = ({
   id,
@@ -32,19 +31,7 @@ const ProductCard = ({
   return (
     <div className="border rounded-lg shadow-xl overflow-hidden transition-shadow duration-300">
       <div
-        onClick={() => {
-          handleProductView({
-            id: productId,
-            productName,
-            images,
-            quantity,
-            brand,
-            description,
-            price,
-            discount,
-            specialPrice,
-          });
-        }}
+        onClick={() => navigate(`/product/${id}`)}
         className="w-full overflow-hidden aspect-[3/2]"
       >
         <img
@@ -56,19 +43,7 @@ const ProductCard = ({
 
       <div className="p-4">
         <h2
-          onClick={() => {
-            handleProductView({
-              id: productId,
-              productName,
-              images,
-              quantity,
-              brand,
-              description,
-              price,
-              discount,
-              specialPrice,
-            });
-          }}
+          onClick={() => navigate(`/product/${id}`)}
           className="text-lg font-semibold mb-2 cursor-pointer"
         >
           {productName}
@@ -93,13 +68,6 @@ const ProductCard = ({
           )}
 
           <button
-            onClick={() => navigate(`/product/${id}`)}
-            className="bg-blue-600 text-white py-2 px-3 rounded-lg items-center transition-colors duration-300 w-30 flex justify-center opacity-100 hover:bg-blue-800"
-          >
-            View Product
-          </button>
-
-          <button
             disabled={!isAvailable || btnLoader}
             onClick={() => {}}
             className={`bg-blue-600 ${
@@ -112,12 +80,6 @@ const ProductCard = ({
           </button>
         </div>
       </div>
-      <ProductViewModal
-        open={openProductViewModal}
-        setOpen={setOpenProductViewModal}
-        product={selectedViewProduct}
-        isAvailable={isAvailable}
-      />
     </div>
   );
 };

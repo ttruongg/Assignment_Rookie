@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrashAlt, FaSearch } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCategories, createCategory } from "../../../store/actions"; // Assuming you have a createCategory action
+import { fetchCategories, createCategory } from "../../../../store/actions"; // Assuming you have a createCategory action
 import CreateCategoryModal from "./CreateCategoryModal";
 import CategoryTable from "./CategoryTable";
 

@@ -1,5 +1,5 @@
 import React from "react";
-import InputField from "../../shared/Inputfiels";
+import InputField from "../../../shared/Inputfiels";
 
 const CreateCategoryModal = ({
   isOpen,

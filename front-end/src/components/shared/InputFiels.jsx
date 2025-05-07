@@ -11,6 +11,10 @@ const InputField = ({
   value,
   placeholder,
 }) => {
+  const handlePhoneInput = (e) => {
+    e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
+  };
+
   return (
     <div className="flex flex-col gap-1 w-full">
       <label
@@ -22,9 +26,13 @@ const InputField = ({
         {label}
       </label>
       <input
-        type={type}
+        type={type === "phonenumber" ? "text" : type}
         id={id}
         placeholder={placeholder}
+        maxLength={type === "phonenumber" ? 10 : undefined}
+        inputMode={type === "phonenumber" ? "numeric" : undefined}
+        pattern={type === "phonenumber" ? "\\d{10}" : undefined}
+        onInput={type === "phonenumber" ? handlePhoneInput : undefined}
         className={`${
           className ? className : ""
         } px-2 py-2 border outline-none bg-transparent text-slate-800 rounded-md ${
@@ -46,6 +54,11 @@ const InputField = ({
                   value:
                     /^(https?:\/\/)?(([a-zA-Z0-9\u00a1-\uffff-]+\.)+[a-zA-Z\u00a1-\uffff]{2,})(:\d{2,5})?(\/[^\s]*)?$/,
                   message: "Please enter a valid url",
+                }
+              : type === "phonenumber"
+              ? {
+                  value: /^\d{10}$/,
+                  message: "Phone number must be exactly 10 digits",
                 }
               : null,
         })}

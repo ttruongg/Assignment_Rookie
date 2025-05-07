@@ -3,9 +3,13 @@ import { useForm } from "react-hook-form";
 import { FaUserPlus } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import InputField from "../shared/Inputfiels";
+import { useDispatch } from "react-redux";
+import { SignUpUser } from "../../store/actions";
+import toast from "react-hot-toast";
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [loader, setLoader] = useState(false);
 
   const {
@@ -19,6 +23,7 @@ const SignUp = () => {
 
   const registerHandler = async (data) => {
     console.log("Register Click");
+    dispatch(SignUpUser(data, toast, reset, navigate, setLoader));
   };
   return (
     <div className="min-h-[calc(100vh-64px)] flex justify-center items-center">
@@ -37,7 +42,7 @@ const SignUp = () => {
           <InputField
             label="UserName"
             required
-            id="username"
+            id="userName"
             type="text"
             message="*UserName is required"
             placeholder="Enter your username"
@@ -64,6 +69,41 @@ const SignUp = () => {
             type="password"
             message="*Password is required"
             placeholder="Enter your password"
+            register={register}
+            errors={errors}
+          />
+
+          <InputField
+            label="First Name"
+            required
+            id="firstName"
+            min={2}
+            type="firstName"
+            message="*firstName is required"
+            placeholder="Enter your first name"
+            register={register}
+            errors={errors}
+          />
+
+          <InputField
+            label="Last Name"
+            required
+            id="lastName"
+            min={3}
+            type="lastName"
+            message="*Last Name is required"
+            placeholder="Enter your last name"
+            register={register}
+            errors={errors}
+          />
+
+          <InputField
+            label="Phone Number"
+            required
+            id="phoneNumber"
+            type="phonenumber"
+            message="*Phone Number is required"
+            placeholder="Enter your Phone Number"
             register={register}
             errors={errors}
           />
