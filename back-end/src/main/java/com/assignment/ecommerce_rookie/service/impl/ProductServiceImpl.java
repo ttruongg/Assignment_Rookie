@@ -164,6 +164,7 @@ public class ProductServiceImpl implements IProductService {
 
         BigDecimal specialPrice = calculateSpecialPrice(product.getPrice(), product.getDiscount());
         product.setSpecialPrice(specialPrice);
+        product.setActive(true);
 
         Product savedProduct = productRepository.save(product);
         return productMapper.toProductDTO(savedProduct);
@@ -227,7 +228,15 @@ public class ProductServiceImpl implements IProductService {
         return productMapper.toProductDTO(product);
     }
 
+    @Override
+    public ProductDTO activateProduct(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product", "productId", productId));
 
+        product.setActive(!product.isActive());
+        productRepository.save(product);
+        return productMapper.toProductDTO(product);
+    }
 
 
 }

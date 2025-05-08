@@ -1,9 +1,7 @@
 package com.assignment.ecommerce_rookie.dto;
 
 import com.assignment.ecommerce_rookie.model.ProductImage;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -12,7 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductDTO {
@@ -26,6 +25,7 @@ public class ProductDTO {
     private double discount;
     private BigDecimal specialPrice;
     private boolean featured;
+    private boolean active;
     private LocalDateTime createdOn;
     private LocalDateTime lastUpdatedOn;
     private Set<Long> categoryIds = new HashSet<>();
