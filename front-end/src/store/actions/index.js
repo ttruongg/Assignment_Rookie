@@ -142,3 +142,50 @@ export const logOutUser = (navigate) => (dispatch) => {
     localStorage.removeItem("auth");
     navigate("/login");
 }
+
+
+export const ratingProduct = (reviewData, toast, resetForm, setLoader) => async (dispatch) => {
+
+    try {
+        setLoader(true);
+        const { data } = await api.post("/ratings", reviewData);
+        dispatch({ type: "ADD_REVIEW", payload: data });
+        resetForm();
+        toast.success(data?.message || "Thank you for your feedback!");
+    } catch (error) {
+        console.log(error);
+        toast.error(error?.response?.data?.message || "Failed to submit review");
+    } finally {
+        setLoader(false);
+    }
+}
+
+export const productReview = (productId) => async (dispatch) => {
+    dispatch({ type: "FETCH_PRODUCT_REVIEW_REQUEST" });
+    try {
+        const { data } = await api.get(`/ratings/${productId}`);
+        dispatch({ type: "FETCH_PRODUCT_REVIEW_SUCCESS", payload: data });
+    } catch (error) {
+        dispatch({
+            type: "FETCH_PRODUCT_REVIEW_FAILURE",
+            payload: error?.response?.data?.message || "Failed to fetch product reviews",
+        });
+    }
+};
+
+export const updateCategory = (categoryId, categoryData) => async (dispatch) => {
+    dispatch({ type: "UPDATE_CATEGORY_REQUEST" });
+    try {
+        const { data } = await api.put(`/admin/categories/${categoryId}`, categoryData, {
+            withCredentials: true,
+        });
+
+        dispatch({ type: "UPDATE_CATEGORY_SUCCESS", payload: data });
+        dispatch(fetchCategories());
+    } catch (error) {
+        dispatch({
+            type: "UPDATE_CATEGORY_FAILURE",
+            payload: error?.response?.data?.message || "Failed to update category",
+        });
+    }
+};

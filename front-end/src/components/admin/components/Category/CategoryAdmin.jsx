@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { FaPlus, FaEdit, FaTrashAlt, FaSearch } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCategories, createCategory } from "../../../../store/actions"; // Assuming you have a createCategory action
+import {
+  fetchCategories,
+  createCategory,
+  updateCategory,
+} from "../../../../store/actions";
 import CreateCategoryModal from "./CreateCategoryModal";
 import CategoryTable from "./CategoryTable";
+import EditCategoryModal from "./EditCategoryModal";
+import toast from "react-hot-toast";
 
 const CategoryAdmin = () => {
   const dispatch = useDispatch();
@@ -12,6 +18,8 @@ const CategoryAdmin = () => {
   const { categories } = useSelector((state) => state.products);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState(null); // For editing
   const [newCategory, setNewCategory] = useState({
     categoryName: "",
     description: "",
@@ -21,13 +29,18 @@ const CategoryAdmin = () => {
     dispatch(fetchCategories());
   }, [dispatch]);
 
-  const handleInputChange = (e) => {
+  const handleNewCategoryInputChange = (e) => {
     const { name, value } = e.target;
     setNewCategory((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleEditCategoryInputChange = (e) => {
+    const { name, value } = e.target;
+    setCurrentCategory((prev) => ({ ...prev, [name]: value }));
+  };
+
   const openCreateModal = () => {
-    setNewCategory({ name: "", description: "" }); // Reset form
+    setNewCategory({ categoryName: "", description: "" });
     setIsCreateModalOpen(true);
   };
 
@@ -39,7 +52,7 @@ const CategoryAdmin = () => {
     e.preventDefault();
     dispatch(
       createCategory({
-        categoryName: newCategory.name,
+        categoryName: newCategory.categoryName,
         description: newCategory.description,
       })
     );
@@ -47,8 +60,28 @@ const CategoryAdmin = () => {
   };
 
   const openEditModal = (category) => {
-    console.log("Open edit modal for:", category, "(not implemented yet)");
+    setCurrentCategory({ ...category });
+    setIsEditModalOpen(true);
   };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setCurrentCategory(null); // Clear current category
+  };
+
+  const handleUpdateCategory = (e) => {
+    e.preventDefault();
+    if (currentCategory) {
+      try {
+        dispatch(updateCategory(currentCategory.id, currentCategory));
+        toast.success("Category updated successfully!");
+      } catch (error) {
+        toast.error("Failed to update category");
+      }
+    }
+    closeEditModal();
+  };
+
   const openDeleteModal = (category) => {
     console.log("Open delete modal for:", category, "(not implemented yet)");
   };
@@ -81,9 +114,17 @@ const CategoryAdmin = () => {
       <CreateCategoryModal
         isOpen={isCreateModalOpen}
         newCategory={newCategory}
-        handleInputChange={handleInputChange}
+        handleInputChange={handleNewCategoryInputChange}
         handleCreateCategory={handleCreateCategory}
         closeCreateModal={closeCreateModal}
+      />
+
+      <EditCategoryModal
+        isOpen={isEditModalOpen}
+        currentCategory={currentCategory}
+        handleInputChange={handleEditCategoryInputChange}
+        handleUpdateCategory={handleUpdateCategory}
+        closeEditModal={closeEditModal}
       />
     </div>
   );

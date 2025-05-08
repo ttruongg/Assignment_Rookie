@@ -9,6 +9,11 @@ const initialState = {
         isLoading: false,
         errorMessage: null,
     },
+    reviews: {
+        data: [],
+        isLoading: false,
+        errorMessage: null,
+    },
 };
 
 export const productReducer = (state = initialState, action) => {
@@ -83,6 +88,56 @@ export const productReducer = (state = initialState, action) => {
             return {
                 ...state,
                 categories: [...state.categories, action.payload],
+            };
+        case "UPDATE_CATEGORY":
+            return {
+                ...state,
+                categories: state.categories.map((category) =>
+                    category.id === action.payload.id ? action.payload : category
+                ),
+            };
+        case "ADD_REVIEW":
+            return {
+                ...state,
+                productDetails: {
+                    ...state.productDetails,
+                    product: {
+                        ...state.productDetails.product,
+                        reviews: [
+                            ...(state.productDetails.product?.reviews || []),
+                            action.payload,
+                        ],
+                    },
+                },
+            };
+        case "FETCH_PRODUCT_REVIEW_REQUEST":
+            return {
+                ...state,
+                reviews: {
+                    data: [],
+                    isLoading: true,
+                    errorMessage: null,
+                },
+            };
+
+        case "FETCH_PRODUCT_REVIEW_SUCCESS":
+            return {
+                ...state,
+                reviews: {
+                    data: action.payload,
+                    isLoading: false,
+                    errorMessage: null,
+                },
+            };
+
+        case "FETCH_PRODUCT_REVIEW_FAILURE":
+            return {
+                ...state,
+                reviews: {
+                    data: [],
+                    isLoading: false,
+                    errorMessage: action.payload,
+                },
             };
         default:
             return state;
