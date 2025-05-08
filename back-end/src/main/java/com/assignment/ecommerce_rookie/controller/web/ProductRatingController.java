@@ -2,6 +2,7 @@ package com.assignment.ecommerce_rookie.controller.web;
 
 
 import com.assignment.ecommerce_rookie.dto.ProductRatingDTO;
+import com.assignment.ecommerce_rookie.dto.ProductRatingResponse;
 import com.assignment.ecommerce_rookie.service.IProductRatingService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/product-ratings")
+@RequestMapping("/api/v1/ratings")
 @AllArgsConstructor
 public class ProductRatingController {
 
@@ -41,8 +42,8 @@ public class ProductRatingController {
     }
 
     @GetMapping("/{productId}")
-    public ResponseEntity<List<ProductRatingDTO>> getRatingsByProduct(@PathVariable Long productId) {
-        List<ProductRatingDTO> ratings = productRatingService.getRatingsByProduct(productId);
+    public ResponseEntity<List<ProductRatingResponse>> getRatingsByProduct(@PathVariable Long productId) {
+        List<ProductRatingResponse> ratings = productRatingService.getRatingsByProduct(productId);
         return new ResponseEntity<>(ratings, HttpStatus.OK);
     }
 
