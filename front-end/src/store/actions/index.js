@@ -151,6 +151,7 @@ export const ratingProduct = (reviewData, toast, resetForm, setLoader) => async 
         const { data } = await api.post("/ratings", reviewData);
         dispatch({ type: "ADD_REVIEW", payload: data });
         resetForm();
+        dispatch(productReview(reviewData.productId));
         toast.success(data?.message || "Thank you for your feedback!");
     } catch (error) {
         console.log(error);

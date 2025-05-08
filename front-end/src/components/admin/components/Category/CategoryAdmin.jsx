@@ -10,6 +10,7 @@ import CreateCategoryModal from "./CreateCategoryModal";
 import CategoryTable from "./CategoryTable";
 import EditCategoryModal from "./EditCategoryModal";
 import toast from "react-hot-toast";
+import { AiOutlineSearch } from "react-icons/ai";
 
 const CategoryAdmin = () => {
   const dispatch = useDispatch();
@@ -103,6 +104,14 @@ const CategoryAdmin = () => {
           <FaPlus />
           <span>Add New Category</span>
         </button>
+
+        <div className="relative flex items-center 2xl:w-[450px] sm:w-[420px] w-full">
+          <input
+            className="border border-gray-400 text-slate-800 rounded-md py-2 pl-4 pr-10 w-full focus:outline-none focus:ring-2 focus:ring-[#1976d2]"
+            placeholder="Search..."
+          />
+          <AiOutlineSearch className="absolute right-3 text-gray-500" />
+        </div>
       </div>
 
       <CategoryTable
