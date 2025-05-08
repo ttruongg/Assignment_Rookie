@@ -17,21 +17,19 @@ const ProductAdmin = () => {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  // const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  // Form/Data States
-  // const [newProduct, setNewProduct] = useState({}); // For create form
-  // const [currentProduct, setCurrentProduct] = useState(null); // For edit/delete
-
-  // Search/Filter States
-  // const [searchTerm, setSearchTerm] = useState("");
-  // const [filteredProducts, setFilteredProducts] = useState([]);
-
-  
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    dispatch(fetchProducts());
-  }, [dispatch]);
+    const params = new URLSearchParams();
+
+    if (search.trim()) {
+      params.set("keyword", search.trim());
+    }
+
+    const queryString = params;
+    dispatch(fetchProducts(queryString));
+  }, [search, dispatch]);
 
   const openCreateModal = () => setIsCreateModalOpen(true);
   const closeCreateModal = () => setIsCreateModalOpen(false);
@@ -51,7 +49,7 @@ const ProductAdmin = () => {
   // const closeDeleteModal = () => setIsDeleteModalOpen(false);
   // const handleDeleteProduct = (productId) => { /* ...dispatch delete action... */ };
 
-  if (isLoading && !products) return <p className="p-4">Loading products...</p>; 
+  if (isLoading && !products) return <p className="p-4">Loading products...</p>;
   if (errorMessage)
     return <p className="p-4 text-red-500">Error: {errorMessage}</p>;
 
@@ -63,14 +61,12 @@ const ProductAdmin = () => {
 
       <div className="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
         <div className="relative w-full sm:w-auto">
-          {/* Search input will go here */}
           <input
             type="text"
             placeholder="Search products..."
-            // value={searchTerm}
-            // onChange={(e) => setSearchTerm(e.target.value)}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
-            disabled // Disabled for now
           />
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>

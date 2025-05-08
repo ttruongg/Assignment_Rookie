@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import ProductViewModal from "./ProductViewModal";
+import { LiaEdit } from "react-icons/lia";
+import { TbXboxX } from "react-icons/tb";
 
 const ProductTable = ({ products }) => {
   const [openProductViewModal, setOpenProductViewModal] = useState(false);
@@ -28,9 +30,26 @@ const ProductTable = ({ products }) => {
       {products.map((product) => (
         <div
           key={product.id}
-          className="bg-white shadow-md rounded-lg p-6 border cursor-pointer"
+          className="bg-white shadow-md rounded-lg p-6 border cursor-pointer relative"
           onClick={() => handleProductView(product)}
         >
+          <div
+            className="absolute top-4 right-4 flex gap-2 z-10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => handleEdit(product)}
+              className="text-blue-600 hover:text-blue-800"
+            >
+              <LiaEdit size={20} />
+            </button>
+            <button
+              onClick={() => handleDelete(product)}
+              className="text-red-600 hover:text-red-800"
+            >
+              <TbXboxX size={20} />
+            </button>
+          </div>
           <h2 className="text-xl font-bold mb-4 text-gray-800">
             {product.productName}
           </h2>
