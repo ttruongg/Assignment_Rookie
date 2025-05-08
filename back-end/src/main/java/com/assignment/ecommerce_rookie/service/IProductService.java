@@ -17,6 +17,7 @@ public interface IProductService {
      */
     ProductResponse getAllProducts(int pageNumber, int pageSize, String sortBy, String sortOrder, String keyword, String category, Boolean featured);
 
+    ProductDTO getProductById(Long productId);
     ProductDTO addProduct(ProductDTO productDTO);
 
     ProductDTO updateProduct(ProductDTO productDTO, Long productId);

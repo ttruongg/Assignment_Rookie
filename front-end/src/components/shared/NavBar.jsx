@@ -7,9 +7,12 @@ import { RxCrossCircled } from "react-icons/rx";
 import { IoMdMenu } from "react-icons/io";
 
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import UserMenu from "../UserMenu";
 const NavBar = () => {
   const path = useLocation().pathname;
   const [NavBarOpen, setNavbarOpen] = useState(false);
+  const { user } = useSelector((state) => state.auth);
   return (
     <div className="h-[70px] bg-custom-gradient text-white z-50 flex items-center sticky top-0">
       <div className="lg:px-14 sm:px-8 px-4 w-full flex justify-between">
@@ -91,19 +94,25 @@ const NavBar = () => {
             </Link>
           </li>
 
-          <li className="font-[500] transition-all duration-150">
-            <Link
-              className="flex items-center space-x-2 px-4 py-[6px] 
+          {user && user.id ? (
+            <li className="font-[500] transition-all duration-150">
+              <UserMenu />
+            </li>
+          ) : (
+            <li className="font-[500] transition-all duration-150">
+              <Link
+                className="flex items-center space-x-2 px-4 py-[6px] 
                 bg-gradient-to-r from-purple-600 to-red-500 
                 text-white font-semibold rounded-md
                 hover:from-purple-500 hover:to-red-400 
                 duration-300 "
-              to="/login"
-            >
-              <IoIosLogIn size={25} />
-              <span>Login</span>
-            </Link>
-          </li>
+                to="/login"
+              >
+                <IoIosLogIn size={25} />
+                <span>Login</span>
+              </Link>
+            </li>
+          )}
         </ul>
 
         <button

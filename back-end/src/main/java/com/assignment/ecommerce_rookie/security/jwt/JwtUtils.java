@@ -52,7 +52,7 @@ public class JwtUtils {
                 .maxAge(accessExpirationMs / 1000)
                 .httpOnly(true)
                 .secure(true)
-                .sameSite("Strict")
+                .sameSite("None")
                 .build();
     }
 
@@ -62,8 +62,8 @@ public class JwtUtils {
                 .path("/api/auth/refresh-token")
                 .maxAge(refreshExpirationMs / 1000)
                 .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
+                .secure(false)
+                .sameSite("None")
                 .build();
     }
 

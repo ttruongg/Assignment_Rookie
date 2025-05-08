@@ -1,12 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineLogin } from "react-icons/ai";
 import InputField from "../shared/Inputfiels";
+import { useDispatch, useSelector } from "react-redux";
+import { authenticateSignInUser } from "../../store/actions";
+import toast from "react-hot-toast";
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [loader, setLoader] = useState(false);
+  const { user } = useSelector((state) => state.auth);
 
   const {
     register,
@@ -18,8 +23,9 @@ const Login = () => {
   });
 
   const loginHandler = async (data) => {
-    console.log("Login Click");
+    dispatch(authenticateSignInUser(data, toast, reset, navigate, setLoader));
   };
+
 
   return (
     <div className="min-h-[calc(100vh-64px)] flex justify-center items-center">
@@ -63,13 +69,7 @@ const Login = () => {
           className="bg-button-gradient flex gap-2 items-center justify-center font-semibold text-white w-full py-2 hover:text-slate-400 duration-100 rounded-sm my-3"
           type="submit"
         >
-          {loader ? (
-            <>
-              <Spinners /> Loading...
-            </>
-          ) : (
-            <>Login</>
-          )}
+          Login
         </button>
 
         <p className="text-center text-sm text-slate-700 mt-6">
