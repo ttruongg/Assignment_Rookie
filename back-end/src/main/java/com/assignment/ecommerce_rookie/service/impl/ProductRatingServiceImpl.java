@@ -1,6 +1,7 @@
 package com.assignment.ecommerce_rookie.service.impl;
 
 import com.assignment.ecommerce_rookie.dto.ProductRatingDTO;
+import com.assignment.ecommerce_rookie.dto.ProductRatingResponse;
 import com.assignment.ecommerce_rookie.exception.APIException;
 import com.assignment.ecommerce_rookie.mapper.ProductRatingMapper;
 import com.assignment.ecommerce_rookie.model.Product;
@@ -65,15 +66,11 @@ public class ProductRatingServiceImpl implements IProductRatingService {
     }
 
     @Override
-    public List<ProductRatingDTO> getRatingsByProduct(Long productId) {
+    public List<ProductRatingResponse> getRatingsByProduct(Long productId) {
         productRepository.findById(productId)
                 .orElseThrow(() -> new APIException("Product not found", HttpStatus.NOT_FOUND));
-
-        List<ProductRating> ratings = ratingRepository.findByProductId(productId);
-
-        return ratings.stream()
-                .map(productRatingMapper::toProductRatingDTO)
-                .toList();
+        
+        return ratingRepository.getRatingByProduct(productId);
 
     }
 
