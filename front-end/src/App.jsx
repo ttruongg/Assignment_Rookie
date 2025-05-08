@@ -13,6 +13,7 @@ import Admin from "./components/admin/Admin";
 
 import { Toaster } from "react-hot-toast";
 import CategoryAdmin from "./components/admin/components/Category/CategoryAdmin";
+import ProductAdmin from "./components/admin/components/ProductAdmin";
 function App() {
   return (
     <Router>
@@ -35,6 +36,8 @@ function App() {
         <Route element={<PrivateRoute adminOnly />}>
           <Route element={<AdminLayout />}>
             <Route path="/admin/categories" element={<CategoryAdmin />} />
+            <Route path="/admin/products" element={<ProductAdmin />} />
+
             <Route path="/admin" element={<Admin />} />
           </Route>
         </Route>
