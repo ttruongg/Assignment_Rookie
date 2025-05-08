@@ -6,26 +6,19 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import { Divider } from "@mui/material";
-import Status from "./Status";
+import Status from "../../../shared/Status";
 import { MdClose, MdDone } from "react-icons/md";
-function ProductViewModal({ open, setOpen, product, isAvailable }) {
-  const {
-    productId,
-    productName,
-    images,
-    quantity,
-    brand,
-    description,
-    price,
-    discount,
-    specialPrice,
-  } = product;
+function ProductViewModal({ open, setOpen, product }) {
 
-  const productImage = images && images.length > 0 ? images[1].imageUrl : "";
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  if (!product) return null;
+  const isAvailable = Number(product.quantity) > 0;
+  const productImage =
+    product.images && product.images.length > 0
+      ? product.images[1].imageUrl
+      : "";
+
+
 
   return (
     <>
@@ -42,9 +35,9 @@ function ProductViewModal({ open, setOpen, product, isAvailable }) {
               transition
               className="w-full max-w-md rounded-xl bg-white/5 p-6 backdrop-blur-2xl duration-300 ease-out data-closed:transform-[scale(95%)] data-closed:opacity-0"
             >
-              {images && (
+              {product.images && (
                 <div className="flex justify-center aspect-[3/2]">
-                  <img src={productImage} alt={productName} />
+                  <img src={productImage} alt={product.productName} />
                 </div>
               )}
 
@@ -53,24 +46,24 @@ function ProductViewModal({ open, setOpen, product, isAvailable }) {
                   as="h1"
                   className="lg:text-3xl sm:text-2xl text-xl font-semibold leading-6 text-white mb-4"
                 >
-                  {productName}
+                  {product.productName}
                 </DialogTitle>
 
                 <div className="space-y-2 text-gray-700 pb-4">
                   <div className="flex items-center justify-between gap-2">
-                    {specialPrice ? (
+                    {product.specialPrice ? (
                       <div className="flex items-center gap-2">
                         <span className="text-stone-300 line-through">
-                          ${Number(price).toFixed(2)}
+                          ${Number(product.price).toFixed(2)}
                         </span>
                         <span className="sm:text-xl font-semibold text-stone-100">
-                          ${Number(specialPrice).toFixed(2)}
+                          ${Number(product.specialPrice).toFixed(2)}
                         </span>
                       </div>
                     ) : (
                       <span className="text-xl font-bold">
                         {" "}
-                        ${Number(price).toFixed(2)}
+                        ${Number(product.price).toFixed(2)}
                       </span>
                     )}
 
@@ -91,9 +84,9 @@ function ProductViewModal({ open, setOpen, product, isAvailable }) {
                     )}
                   </div>
                 </div>
-                <Divider className="bg-white" />
+               
 
-                <p className="mt-2 text-sm/6 text-violet-50">{description}</p>
+                
                 <div className="mt-4">
                   <Button
                     className="rounded-md bg-gray-700 px-3 py-1.5 text-sm/6 font-semibold text-white"

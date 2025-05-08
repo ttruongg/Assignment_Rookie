@@ -21,20 +21,6 @@ const CategoryAdmin = () => {
 
   const [search, setSearch] = useState("");
 
-  // useEffect(() => {
-  //   const handler = setTimeout(() => {
-  //     if (search) {
-  //       params.set("keyword", search);
-  //     } else {
-  //       params.delete("keyword");
-  //     }
-  //     navigate(`${pathName}?${params.toString()}`);
-  //   }, 700);
-
-  //   return () => {
-  //     clearTimeout(handler);
-  //   };
-  // }, [searchParams, search, navigate, pathName]);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);

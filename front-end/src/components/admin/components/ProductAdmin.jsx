@@ -7,7 +7,6 @@ import { fetchProducts } from "../../../store/actions";
 import CreateProductModal from "./Product/CreatProductModal";
 import EditProductModal from "./Product/EditProductModal";
 import ProductTable from "./Product/ProductTable";
-// import DeleteProductModal from "./DeleteProductModal"; // Placeholder for delete
 
 const ProductAdmin = () => {
   const dispatch = useDispatch();
@@ -15,8 +14,6 @@ const ProductAdmin = () => {
   const { isLoading, errorMessage } = useSelector((state) => state.errors);
 
   const { products } = useSelector((state) => state.products);
-
-  console.log("products:", products);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -30,19 +27,16 @@ const ProductAdmin = () => {
   // const [searchTerm, setSearchTerm] = useState("");
   // const [filteredProducts, setFilteredProducts] = useState([]);
 
+  
+
   useEffect(() => {
-    // Dispatch action to fetch products.
-    // You might need to pass page number and page size if your API supports pagination
-    dispatch(fetchProducts()); // Example: fetching first page, 20 items
+    dispatch(fetchProducts());
   }, [dispatch]);
 
-  // Placeholder handlers - to be implemented
   const openCreateModal = () => setIsCreateModalOpen(true);
   const closeCreateModal = () => setIsCreateModalOpen(false);
-  // const handleCreateProduct = (productData) => { /* ...dispatch create action... */ };
 
   const openEditModal = (product) => {
-    // setCurrentProduct(product);
     setIsEditModalOpen(true);
     console.log("Editing product:", product);
   };
@@ -57,12 +51,9 @@ const ProductAdmin = () => {
   // const closeDeleteModal = () => setIsDeleteModalOpen(false);
   // const handleDeleteProduct = (productId) => { /* ...dispatch delete action... */ };
 
-  if (isLoading && !products)
-    return <p className="p-4">Loading products...</p>; // Show loading only if no data yet
+  if (isLoading && !products) return <p className="p-4">Loading products...</p>; 
   if (errorMessage)
     return <p className="p-4 text-red-500">Error: {errorMessage}</p>;
-
-  const productsToDisplay = products || []; // Fallback to empty array if productData is null/undefined
 
   return (
     <div className="container mx-auto p-4">
