@@ -15,7 +15,7 @@ public interface IProductService {
      * @param category   a category to filter products by
      * @return a ProductResponse object containing the list of products and pagination information
      */
-    ProductResponse getAllProducts(int pageNumber, int pageSize, String sortBy, String sortOrder, String keyword, String category);
+    ProductResponse getAllProducts(int pageNumber, int pageSize, String sortBy, String sortOrder, String keyword, String category, Boolean featured);
 
     ProductDTO addProduct(ProductDTO productDTO);
 

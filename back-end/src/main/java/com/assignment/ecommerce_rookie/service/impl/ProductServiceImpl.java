@@ -49,9 +49,9 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public ProductResponse getAllProducts(int pageNumber, int pageSize, String sortBy, String sortOrder, String keyword, String category) {
+    public ProductResponse getAllProducts(int pageNumber, int pageSize, String sortBy, String sortOrder, String keyword, String category, Boolean featured) {
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, sortOrder);
-        Specification<Product> specification = createProductSpecification(keyword, category);
+        Specification<Product> specification = createProductSpecification(keyword, category, featured);
 
         Page<Product> productsPage = productRepository.findAll(specification, pageable);
         List<ProductDTO> productDTOs = convertToProductDTOs(productsPage.getContent());
@@ -65,10 +65,11 @@ public class ProductServiceImpl implements IProductService {
         return PageRequest.of(pageNumber, pageSize, sort);
     }
 
-    private Specification<Product> createProductSpecification(String keyword, String category) {
+    private Specification<Product> createProductSpecification(String keyword, String category, Boolean featured) {
         return Specification.where(fetchCategories())
                 .and(applyKeywordFilter(keyword))
-                .and(applyCategoryFilter(category));
+                .and(applyCategoryFilter(category))
+                .and(applyFeaturedFilter(featured));
     }
 
     private Specification<Product> fetchCategories() {
@@ -85,6 +86,14 @@ public class ProductServiceImpl implements IProductService {
         }
         return (root, query, cb) -> cb.like(cb.lower(root.get("productName")), "%" + keyword.toLowerCase() + "%");
     }
+
+    private Specification<Product> applyFeaturedFilter(Boolean featured) {
+        if (featured == null) {
+            return null;
+        }
+        return (root, query, cb) -> cb.equal(root.get("featured"), featured);
+    }
+
 
     private List<ProductDTO> convertToProductDTOs(List<Product> products) {
         return products.stream()
