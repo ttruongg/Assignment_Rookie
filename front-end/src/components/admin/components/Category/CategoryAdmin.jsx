@@ -10,6 +10,8 @@ import CreateCategoryModal from "./CreateCategoryModal";
 import CategoryTable from "./CategoryTable";
 import EditCategoryModal from "./EditCategoryModal";
 import toast from "react-hot-toast";
+import { AiOutlineSearch } from "react-icons/ai";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 const CategoryAdmin = () => {
   const dispatch = useDispatch();
@@ -17,17 +19,23 @@ const CategoryAdmin = () => {
   const { isLoading, errorMessage } = useSelector((state) => state.errors);
   const { categories } = useSelector((state) => state.products);
 
+  const [search, setSearch] = useState("");
+
+
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [currentCategory, setCurrentCategory] = useState(null); // For editing
+  const [currentCategory, setCurrentCategory] = useState(null);
   const [newCategory, setNewCategory] = useState({
     categoryName: "",
     description: "",
   });
 
   useEffect(() => {
-    dispatch(fetchCategories());
-  }, [dispatch]);
+    const handler = setTimeout(() => {
+      dispatch(fetchCategories(search));
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [search]);
 
   const handleNewCategoryInputChange = (e) => {
     const { name, value } = e.target;
@@ -103,6 +111,15 @@ const CategoryAdmin = () => {
           <FaPlus />
           <span>Add New Category</span>
         </button>
+
+        <div className="relative flex items-center 2xl:w-[450px] sm:w-[420px] w-full">
+          <input
+            className="border border-gray-400 text-slate-800 rounded-md py-2 pl-4 pr-10 w-full focus:outline-none focus:ring-2 focus:ring-[#1976d2]"
+            placeholder="Search..."
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <AiOutlineSearch className="absolute right-3 text-gray-500" />
+        </div>
       </div>
 
       <CategoryTable

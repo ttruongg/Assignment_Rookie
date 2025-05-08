@@ -6,6 +6,7 @@ import com.assignment.ecommerce_rookie.exception.APIException;
 import com.assignment.ecommerce_rookie.exception.NotFoundException;
 import com.assignment.ecommerce_rookie.mapper.CategoryMapper;
 import com.assignment.ecommerce_rookie.model.Category;
+import com.assignment.ecommerce_rookie.model.Product;
 import com.assignment.ecommerce_rookie.repository.CategoryRepository;
 import com.assignment.ecommerce_rookie.service.ICategoryService;
 import jakarta.transaction.Transactional;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,37 +30,53 @@ public class CategoryServiceImpl implements ICategoryService {
     private CategoryMapper categoryMapper;
 
     @Override
-    public CategoryResponse getAllCategories(int pageNumber, int pageSize, String sortBy, String sortOrder) {
+    public CategoryResponse getAllCategories(int pageNumber, int pageSize, String sortBy, String sortOrder, String keyword) {
 
-        Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc")
+        Pageable pageable = createPageable(pageNumber, pageSize, sortBy, sortOrder);
+        Specification<Category> specification = createKeywordOnlySpecification(keyword);
+
+        Page<Category> categoryPage = categoryRepository.findAll(specification, pageable);
+        List<CategoryDTO> categoryDTOs = convertToCategoryDTOs(categoryPage.getContent());
+
+        return buildCategoryResponse(categoryPage, categoryDTOs);
+    }
+
+    private Pageable createPageable(int pageNumber, int pageSize, String sortBy, String sortOrder) {
+        Sort sort = sortOrder.equalsIgnoreCase("asc")
                 ? Sort.by(sortBy).ascending()
                 : Sort.by(sortBy).descending();
-
-
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
-        Page<Category> categoryPage = categoryRepository.findAll(pageable);
-
-        List<Category> categories = categoryPage.getContent();
-
-        if (categories.isEmpty()) {
-            throw new APIException("No category was found!");
-        }
-
-        List<CategoryDTO> categoryDTOList = categories.stream()
-                .map(category -> (categoryMapper.toCategoryDTO(category)))
-                .toList();
-
-        CategoryResponse categoryResponse = new CategoryResponse();
-        categoryResponse.setCategories(categoryDTOList);
-        categoryResponse.setPageNumber(categoryPage.getNumber());
-        categoryResponse.setPageSize(categoryPage.getSize());
-        categoryResponse.setLastPage(categoryPage.isLast());
-        categoryResponse.setTotalElements(categoryPage.getTotalElements());
-        categoryResponse.setTotalPages(categoryPage.getTotalPages());
-
-
-        return categoryResponse;
+        return PageRequest.of(pageNumber, pageSize, sort);
     }
+
+    private Specification<Category> createKeywordOnlySpecification(String keyword) {
+        return applyKeywordFilter(keyword);
+    }
+
+    private Specification<Category> applyKeywordFilter(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return null;
+        }
+        return (root, query, cb) ->
+                cb.like(cb.lower(root.get("categoryName")), "%" + keyword.toLowerCase() + "%");
+    }
+
+    private List<CategoryDTO> convertToCategoryDTOs(List<Category> categories) {
+        return categories.stream()
+                .map(categoryMapper::toCategoryDTO)
+                .toList();
+    }
+
+    private CategoryResponse buildCategoryResponse(Page<Category> categoryPage, List<CategoryDTO> categoryDTOList) {
+        CategoryResponse response = new CategoryResponse();
+        response.setCategories(categoryDTOList);
+        response.setPageNumber(categoryPage.getNumber());
+        response.setPageSize(categoryPage.getSize());
+        response.setTotalElements(categoryPage.getTotalElements());
+        response.setTotalPages(categoryPage.getTotalPages());
+        response.setLastPage(categoryPage.isLast());
+        return response;
+    }
+
 
     @Transactional
     @Override

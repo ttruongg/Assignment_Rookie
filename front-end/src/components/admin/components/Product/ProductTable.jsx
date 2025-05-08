@@ -1,6 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
+import ProductViewModal from "./ProductViewModal";
 
 const ProductTable = ({ products }) => {
+  const [openProductViewModal, setOpenProductViewModal] = useState(false);
+  const [selectedViewProduct, setSelectedViewProduct] = useState(null);
+
+  const handleProductView = (product) => {
+    setSelectedViewProduct(product);
+    setOpenProductViewModal(true);
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString();
@@ -19,7 +28,8 @@ const ProductTable = ({ products }) => {
       {products.map((product) => (
         <div
           key={product.id}
-          className="bg-white shadow-md rounded-lg p-6 border"
+          className="bg-white shadow-md rounded-lg p-6 border cursor-pointer"
+          onClick={() => handleProductView(product)}
         >
           <h2 className="text-xl font-bold mb-4 text-gray-800">
             {product.productName}
@@ -68,6 +78,11 @@ const ProductTable = ({ products }) => {
           </div>
         </div>
       ))}
+      <ProductViewModal
+        open={openProductViewModal}
+        setOpen={setOpenProductViewModal}
+        product={selectedViewProduct}
+      />
     </div>
   );
 };
