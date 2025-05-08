@@ -5,7 +5,7 @@ import com.assignment.ecommerce_rookie.dto.CategoryResponse;
 
 public interface ICategoryService {
 
-    CategoryResponse getAllCategories(int pageNumber, int pageSize, String sortBy, String sortOrder);
+    CategoryResponse getAllCategories(int pageNumber, int pageSize, String sortBy, String sortOrder, String keyword);
 
     CategoryDTO createCategory(CategoryDTO categoryDTO);
 

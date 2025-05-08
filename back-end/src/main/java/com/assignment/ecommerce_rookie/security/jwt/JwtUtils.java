@@ -62,7 +62,7 @@ public class JwtUtils {
                 .path("/api/auth/refresh-token")
                 .maxAge(refreshExpirationMs / 1000)
                 .httpOnly(true)
-                .secure(false)
+                .secure(true)
                 .sameSite("None")
                 .build();
     }

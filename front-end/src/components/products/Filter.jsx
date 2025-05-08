@@ -1,5 +1,6 @@
 import {
   Button,
+  Checkbox,
   FormControl,
   InputLabel,
   MenuItem,
@@ -25,6 +26,7 @@ const Filter = ({ categories }) => {
   const [category, setCategory] = useState("all");
   const [sortOrder, setSortOrder] = useState("asc");
   const [search, setSearch] = useState("");
+  const [featured, setFeatured] = useState(false);
 
   useEffect(() => {
     const currentCategory = searchParams.get("category") || "all";
@@ -43,13 +45,19 @@ const Filter = ({ categories }) => {
       } else {
         params.delete("keyword");
       }
+
+      if (featured) {
+        params.set("featured", "true");
+      } else {
+        params.delete("featured");
+      }
       navigate(`${pathName}?${params.toString()}`);
     }, 700);
 
     return () => {
       clearTimeout(handler);
     };
-  }, [searchParams, search, navigate, pathName]);
+  }, [searchParams, search, featured, navigate, pathName]);
 
   const handleCategoryChange = (e) => {
     const selectedCategory = e.target.value;
@@ -114,6 +122,11 @@ const Filter = ({ categories }) => {
           </Select>
         </FormControl>
 
+        <span className="text-slate-800 border-slate-700">Featured</span>
+        <Checkbox
+          checked={featured}
+          onChange={(e) => setFeatured(e.target.checked)}
+        />
         <Tooltip title="Sorted by price">
           <Button
             onClick={handleSortOrderChange}

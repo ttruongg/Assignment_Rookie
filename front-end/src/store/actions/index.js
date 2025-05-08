@@ -25,11 +25,17 @@ export const fetchProducts = (queryString) => async (dispatch) => {
 }
 
 
-export const fetchCategories = () => async (dispatch) => {
+export const fetchCategories = (queryString = "") => async (dispatch) => {
     try {
+        let endpoint = `/categories`;
+
+        if (queryString) {
+            endpoint = `/categories?keyword=${queryString}`;
+        }
 
         dispatch({ type: "LOADING_CATEGORY" })
-        const { data } = await api.get(`/categories`);
+        const { data } = await api.get(endpoint);
+        console.log("query: ", queryString, "- ", endpoint);
         dispatch({
             type: "FETCH_CATEGORIES",
             payload: data.categories,
@@ -151,6 +157,7 @@ export const ratingProduct = (reviewData, toast, resetForm, setLoader) => async 
         const { data } = await api.post("/ratings", reviewData);
         dispatch({ type: "ADD_REVIEW", payload: data });
         resetForm();
+        dispatch(productReview(reviewData.productId));
         toast.success(data?.message || "Thank you for your feedback!");
     } catch (error) {
         console.log(error);
