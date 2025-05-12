@@ -133,7 +133,7 @@ class categoryServiceImplTest {
 
     @Test
     void updateCategory_successful() {
-        // Given
+
         Long categoryId = 1L;
 
         CategoryDTO inputDTO = new CategoryDTO();
@@ -156,10 +156,10 @@ class categoryServiceImplTest {
         when(categoryRepository.save(updatedCategoryEntity)).thenReturn(updatedCategoryEntity);
         when(categoryMapper.toCategoryDTO(updatedCategoryEntity)).thenReturn(resultDTO);
 
-        // When
+
         CategoryDTO updated = CategoryServiceImpl.updateCategory(inputDTO, categoryId);
 
-        // Then
+
         assertNotNull(updated);
         assertEquals(categoryId, updated.getId());
         assertEquals("Updated Category", updated.getCategoryName());
@@ -171,14 +171,14 @@ class categoryServiceImplTest {
 
     @Test
     void updateCategory_notFound_throwsException() {
-        // Given
+
         Long categoryId = 999L;
         CategoryDTO inputDTO = new CategoryDTO();
         inputDTO.setCategoryName("Should Not Matter");
 
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.empty());
 
-        // When & Then
+
         NotFoundException ex = assertThrows(NotFoundException.class, () ->
                 CategoryServiceImpl.updateCategory(inputDTO, categoryId)
         );

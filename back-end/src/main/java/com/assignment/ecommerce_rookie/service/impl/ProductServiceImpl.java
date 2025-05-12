@@ -49,6 +49,13 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
+    public ProductDTO getProductById(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("Product", "productId", productId));
+        return productMapper.toProductDTO(product);
+    }
+
+    @Override
     public ProductResponse getAllProducts(int pageNumber, int pageSize, String sortBy, String sortOrder, String keyword, String category, Boolean featured) {
         Pageable pageable = createPageable(pageNumber, pageSize, sortBy, sortOrder);
         Specification<Product> specification = createProductSpecification(keyword, category, featured);
@@ -60,12 +67,7 @@ public class ProductServiceImpl implements IProductService {
 
     }
 
-    @Override
-    public ProductDTO getProductById(Long productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new NotFoundException("Product", "productId", productId));
-        return productMapper.toProductDTO(product);
-    }
+
 
     private Pageable createPageable(int pageNumber, int pageSize, String sortBy, String sortOrder) {
         Sort sort = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
@@ -73,19 +75,12 @@ public class ProductServiceImpl implements IProductService {
     }
 
     private Specification<Product> createProductSpecification(String keyword, String category, Boolean featured) {
-        return Specification.where(fetchCategories())
-                .and(applyKeywordFilter(keyword))
+        return Specification.where(applyKeywordFilter(keyword))
                 .and(applyCategoryFilter(category))
                 .and(applyFeaturedFilter(featured));
     }
 
-    private Specification<Product> fetchCategories() {
-        return (root, query, cb) -> {
-            root.fetch("categories", JoinType.LEFT);
-            query.distinct(true);
-            return cb.conjunction();
-        };
-    }
+
 
     private Specification<Product> applyKeywordFilter(String keyword) {
         if (keyword == null || keyword.isEmpty()) {
