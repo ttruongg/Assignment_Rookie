@@ -4,6 +4,8 @@ const initialState = {
     featuredProducts: null,
     featuredPagination: {},
     pagination: {},
+    uploading: false,
+    creating: false,
     productDetails: {
         product: null,
         isLoading: false,
@@ -139,6 +141,54 @@ export const productReducer = (state = initialState, action) => {
                     errorMessage: action.payload,
                 },
             };
+        case "UPLOAD_IMAGE_START":
+            return {
+                ...state,
+                uploading: true,
+                errorMessage: null,
+            };
+        case "UPLOAD_IMAGE_SUCCESS":
+            return {
+                ...state,
+                uploading: false,
+            };
+        case "UPLOAD_IMAGE_ERROR":
+            return {
+                ...state,
+                uploading: false,
+                errorMessage: action.payload,
+            };
+
+        case "CREATE_PRODUCT_START":
+            return {
+                ...state,
+                creating: true,
+                errorMessage: null,
+            };
+        case "CREATE_PRODUCT_SUCCESS":
+            return {
+                ...state,
+                creating: false,
+                products: state.products ? [...state.products, action.payload] : [action.payload],
+            };
+        case "CREATE_PRODUCT_ERROR":
+            return {
+                ...state,
+                creating: false,
+                errorMessage: action.payload,
+            };
+
+        case "TOGGLE_PRODUCT_ACTIVE_STATUS":
+            return {
+                ...state,
+                products: state.products.map((p) =>
+                    p.id === action.payload.id ? action.payload : p
+                ),
+            };
+
+
+
+
         default:
             return state;
 

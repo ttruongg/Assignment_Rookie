@@ -2,6 +2,7 @@ package com.assignment.ecommerce_rookie.controller.admin;
 
 import com.assignment.ecommerce_rookie.dto.ProductDTO;
 import com.assignment.ecommerce_rookie.service.IProductService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,13 @@ public class AdminProductController {
     @DeleteMapping("/{productId}")
     public ResponseEntity<ProductDTO> deleteProduct(@PathVariable Long productId) {
         ProductDTO productDTO = productService.deleteProduct(productId);
+        return new ResponseEntity<>(productDTO, HttpStatus.OK);
+    }
+
+    @PatchMapping("/{productId}")
+    @Transactional
+    public ResponseEntity<ProductDTO> activateProduct(@PathVariable Long productId) {
+        ProductDTO productDTO = productService.activateProduct(productId);
         return new ResponseEntity<>(productDTO, HttpStatus.OK);
     }
 }

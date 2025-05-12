@@ -11,6 +11,7 @@ const ProductCard = ({
   price,
   discount,
   specialPrice,
+  active,
 }) => {
   const isAvailable = quantity && Number(quantity) > 0;
 
@@ -68,15 +69,17 @@ const ProductCard = ({
           )}
 
           <button
-            disabled={!isAvailable || btnLoader}
+            disabled={!isAvailable || btnLoader || !active}
             onClick={() => {}}
             className={`bg-blue-600 ${
-              isAvailable ? "opacity-100 hover:bg-blue-800" : "opacity-70"
+              isAvailable && active
+                ? "opacity-100 hover:bg-blue-800"
+                : "opacity-70"
             }
             text-white py-2 px-3 rounded-lg items-center transition-colors duration-300 w-30 flex justify-center`}
           >
             <FaCartShopping className="mr-2" />
-            {isAvailable ? "Add to Cart" : "Stock Out"}
+            {isAvailable && active ? "Add to Cart" : "Stock Out"}
           </button>
         </div>
       </div>

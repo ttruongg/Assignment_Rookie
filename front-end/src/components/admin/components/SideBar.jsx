@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 const navItems = [
   { title: "Categories", icon: <FaFolder />, path: "/admin/categories" },
   { title: "Products", icon: <FaBoxOpen />, path: "/admin/products" },
-  { title: "Users", icon: <FaUsers />, path: "/users" },
+  { title: "Users", icon: <FaUsers />, path: "/admin/users" },
 ];
 
 const Sidebar = () => {

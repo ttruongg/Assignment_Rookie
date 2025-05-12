@@ -51,6 +51,7 @@ public class Product {
     private double discount;
     private BigDecimal specialPrice;
     private boolean featured;
+    private boolean active;
 
 
     @Column(nullable = false, updatable = false)
