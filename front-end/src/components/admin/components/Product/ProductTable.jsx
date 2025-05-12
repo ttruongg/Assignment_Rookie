@@ -1,15 +1,67 @@
 import React, { useState } from "react";
 import ProductViewModal from "./ProductViewModal";
 import { LiaEdit } from "react-icons/lia";
+import { Switch } from "@mui/material";
+import { MdCheckCircleOutline } from "react-icons/md";
 import { TbXboxX } from "react-icons/tb";
+import EditProductModal from "./EditProductModal";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+} from "@mui/material";
+import {
+  fetchProducts,
+  updateProductActiveStatus,
+} from "../../../../store/actions";
+import toast from "react-hot-toast";
+import { useDispatch } from "react-redux";
 
 const ProductTable = ({ products }) => {
+  const dispatch = useDispatch();
   const [openProductViewModal, setOpenProductViewModal] = useState(false);
   const [selectedViewProduct, setSelectedViewProduct] = useState(null);
+
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [selectedEditProduct, setSelectedEditProduct] = useState(null);
+
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [targetProduct, setTargetProduct] = useState(null);
+
+  const handleToggleActive = (product) => {
+    setTargetProduct(product);
+    setConfirmDialogOpen(true);
+  };
+
+  const confirmToggleActive = async () => {
+    if (!targetProduct) return;
+    try {
+      await dispatch(updateProductActiveStatus(targetProduct.id));
+
+      dispatch(fetchProducts());
+
+      setConfirmDialogOpen(false);
+      setTargetProduct(null);
+      toast.success("Active status updated successfully!");
+    } catch (error) {
+      console.error("Failed to update active status", error);
+    }
+  };
 
   const handleProductView = (product) => {
     setSelectedViewProduct(product);
     setOpenProductViewModal(true);
+  };
+
+  const handleEdit = (product) => {
+    setSelectedEditProduct(product);
+    setOpenEditModal(true);
+  };
+
+  const handleSaveEdit = (updatedProduct) => {
+    console.log("Save product:", updatedProduct);
   };
 
   const formatDate = (dateString) => {
@@ -24,6 +76,7 @@ const ProductTable = ({ products }) => {
       </div>
     );
   }
+  console.log("product: ", products);
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 mt-6">
@@ -43,12 +96,10 @@ const ProductTable = ({ products }) => {
             >
               <LiaEdit size={20} />
             </button>
-            <button
-              onClick={() => handleDelete(product)}
-              className="text-red-600 hover:text-red-800"
-            >
-              <TbXboxX size={20} />
-            </button>
+            <Switch
+              checked={product.active}
+              onChange={() => handleToggleActive(product)}
+            />
           </div>
           <h2 className="text-xl font-bold mb-4 text-gray-800">
             {product.productName}
@@ -86,6 +137,18 @@ const ProductTable = ({ products }) => {
                 <span className="text-red-600 font-medium">No</span>
               )}
             </div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">Active:</span>
+              {product.active ? (
+                <span className="text-green-600 flex items-center gap-1 font-medium">
+                  <MdCheckCircleOutline />
+                </span>
+              ) : (
+                <span className="text-red-600 flex items-center gap-1 font-medium">
+                  <TbXboxX />
+                </span>
+              )}
+            </div>
             <div>
               <span className="font-semibold">Created On:</span>{" "}
               {formatDate(product.createdOn)}
@@ -102,6 +165,34 @@ const ProductTable = ({ products }) => {
         setOpen={setOpenProductViewModal}
         product={selectedViewProduct}
       />
+
+      <EditProductModal
+        open={openEditModal}
+        onClose={() => setOpenEditModal(false)}
+        product={selectedEditProduct}
+        onSave={handleSaveEdit}
+      />
+
+      <Dialog
+        open={confirmDialogOpen}
+        onClose={() => setConfirmDialogOpen(false)}
+      >
+        <DialogTitle>Confirm Status Change</DialogTitle>
+        <DialogContent>
+          Are you sure you want to{" "}
+          {targetProduct?.active ? "deactivate" : "activate"} this product?
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={confirmToggleActive}
+            color="primary"
+            variant="contained"
+          >
+            Confirm
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

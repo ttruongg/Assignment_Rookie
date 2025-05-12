@@ -68,7 +68,6 @@ const ProductPage = () => {
           </div>
         </div>
 
-        {/* ABOUT */}
         <div className="flex flex-col gap-4 lg:w-2/4">
           <div>
             <span className="text-violet-600 font-semibold">
@@ -96,8 +95,11 @@ const ProductPage = () => {
                 +
               </button>
             </div>
-            <button className="bg-violet-800 text-white font-semibold py-3 px-16 rounded-xl h-full">
-              Add to Cart
+            <button
+              disabled={!product?.active}
+              className="bg-violet-800 text-white font-semibold py-3 px-16 rounded-xl h-full"
+            >
+              {product?.active ? "Add to Cart" : "Stock Out"}
             </button>
           </div>
         </div>

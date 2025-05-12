@@ -11,7 +11,6 @@ import CategoryTable from "./CategoryTable";
 import EditCategoryModal from "./EditCategoryModal";
 import toast from "react-hot-toast";
 import { AiOutlineSearch } from "react-icons/ai";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 const CategoryAdmin = () => {
   const dispatch = useDispatch();
@@ -20,7 +19,6 @@ const CategoryAdmin = () => {
   const { categories } = useSelector((state) => state.products);
 
   const [search, setSearch] = useState("");
-
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -58,13 +56,20 @@ const CategoryAdmin = () => {
 
   const handleCreateCategory = (e) => {
     e.preventDefault();
-    dispatch(
-      createCategory({
-        categoryName: newCategory.categoryName,
-        description: newCategory.description,
-      })
-    );
-    closeCreateModal();
+    try {
+      dispatch(
+        createCategory({
+          categoryName: newCategory.categoryName,
+          description: newCategory.description,
+        })
+      );
+      toast.success("Category created successfully!");
+      closeCreateModal();
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message || "Failed to create category"
+      );
+    }
   };
 
   const openEditModal = (category) => {
@@ -74,7 +79,7 @@ const CategoryAdmin = () => {
 
   const closeEditModal = () => {
     setIsEditModalOpen(false);
-    setCurrentCategory(null); // Clear current category
+    setCurrentCategory(null);
   };
 
   const handleUpdateCategory = (e) => {

@@ -118,10 +118,9 @@ export const createCategory = (categoryData, toast) => async (dispatch) => {
             withCredentials: true,
         });
         dispatch({ type: "CREATE_CATEGORY", payload: data });
-        toast.success("Category created successfully!");
+        return data;
     } catch (error) {
-        console.log(error);
-        toast.error(error?.response?.data?.message || "Failed to create category");
+        throw error;
     }
 };
 
@@ -196,3 +195,93 @@ export const updateCategory = (categoryId, categoryData) => async (dispatch) => 
         });
     }
 };
+
+
+export const uploadProductImages = (files) => async (dispatch) => {
+    try {
+        const formData = new FormData();
+        files.forEach((file) => formData.append("files", file));
+
+        dispatch({ type: "UPLOAD_IMAGE_START" });
+
+        const { data } = await api.post("/admin/images", formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+            withCredentials: true,
+        });
+
+
+        dispatch({
+            type: "UPLOAD_IMAGE_SUCCESS",
+            payload: data
+        });
+
+        return data;
+    } catch (error) {
+        dispatch({
+            type: "UPLOAD_IMAGE_ERROR",
+            payload: error?.response?.data?.message || "Upload failed",
+        });
+        throw error;
+    }
+};
+
+export const createProduct = (productData) => async (dispatch) => {
+    try {
+        dispatch({ type: "CREATE_PRODUCT_START" });
+
+        const { data } = await api.post("/admin/products", productData, {
+            withCredentials: true,
+        });
+
+        dispatch({
+            type: "CREATE_PRODUCT_SUCCESS",
+            payload: data,
+        });
+
+        return data;
+    } catch (error) {
+        dispatch({
+            type: "CREATE_PRODUCT_ERROR",
+            payload: error?.response?.data?.message || "Product creation failed",
+        });
+        throw error;
+    }
+};
+
+export const updateProductActiveStatus = (productId, active) => async (dispatch) => {
+    try {
+        const { data } = await api.patch(`/admin/products/${productId}`, {
+            withCredentials: true,
+        });
+
+        dispatch({ type: "UPDATE_PRODUCT_ACTIVE_STATUS", payload: data });
+
+        return data;
+    } catch (error) {
+        console.error("Failed to update product active status", error);
+        throw error;
+    }
+};
+
+export const fetchUsers = (keyword = "") => async (dispatch) => {
+    try {
+        let endpoint = "/admin/users";
+        if (keyword) {
+            endpoint = `/admin/users?keyword=${keyword}`;
+        }
+        dispatch({ type: "IS_FETCHING" });
+        const { data } = await api.get(endpoint);
+
+        dispatch({
+            type: "FETCH_USERS",
+            payload: data,
+        });
+        dispatch({ type: "IS_FETCHED" });
+    } catch (error) {
+        dispatch({
+            type: "IS_ERROR",
+            payload: error?.response?.data?.message || "Failed to fetch users",
+        });
+    }
+};
+
