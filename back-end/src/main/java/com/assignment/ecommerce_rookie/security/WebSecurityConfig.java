@@ -1,11 +1,13 @@
 package com.assignment.ecommerce_rookie.security;
 
+import com.assignment.ecommerce_rookie.model.AppRole;
 import com.assignment.ecommerce_rookie.security.jwt.AuthEntryPointJwt;
 import com.assignment.ecommerce_rookie.security.jwt.AuthTokenFilter;
 import com.assignment.ecommerce_rookie.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -13,6 +15,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,6 +30,11 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig {
+
+    private static final String[] CATEGORY_PATHS = {"/api/v1/categories/**"};
+    private static final String[] PRODUCT_PATHS = {"/api/v1/products/**"};
+    private static final String[] USER_PATHS = {"/api/v1/users/**"};
+    private static final String[] AUTH_PATHS = {"/api/v1/auth/**"};
 
     @Autowired
     UserDetailsServiceImpl userDetailsService;
@@ -68,16 +76,16 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN")
-                                .requestMatchers("/api/v1/product-ratings").hasAuthority("USER")
-                                .requestMatchers("/api/v1/**").permitAll()
-                                .requestMatchers("/v3/api-docs/**").permitAll()
-                                .requestMatchers("/swagger-ui/**").permitAll()
-                                .requestMatchers("/swagger-ui.html").permitAll()
-                                .requestMatchers("/error").permitAll()
-                                .anyRequest().authenticated()
+                .authorizeHttpRequests(auth -> {
+                            configureAuthAccess(auth);
+                            configureCategoryAccess(auth);
+                            configureProductAccess(auth);
+                            configureUserAccess(auth);
+                            auth.requestMatchers("/api/v1/product-ratings").hasAuthority(AppRole.USER.name());
+                            auth.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/error").permitAll()
+                                    .anyRequest().authenticated();
+                        }
+
 
                 );
 
@@ -87,6 +95,32 @@ public class WebSecurityConfig {
 
 
         return http.build();
+    }
+
+    private void configureCategoryAccess(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth) {
+        auth.requestMatchers(HttpMethod.GET, CATEGORY_PATHS).permitAll();
+        auth.requestMatchers(HttpMethod.POST, CATEGORY_PATHS).hasAuthority(AppRole.ADMIN.name());
+        auth.requestMatchers(HttpMethod.PUT, CATEGORY_PATHS).hasAuthority(AppRole.ADMIN.name());
+        auth.requestMatchers(HttpMethod.DELETE, CATEGORY_PATHS).hasAuthority(AppRole.ADMIN.name());
+    }
+
+    private void configureProductAccess(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth) {
+        auth.requestMatchers(HttpMethod.GET, PRODUCT_PATHS).permitAll();
+        auth.requestMatchers(HttpMethod.POST, PRODUCT_PATHS).hasAuthority(AppRole.ADMIN.name());
+        auth.requestMatchers(HttpMethod.PUT, PRODUCT_PATHS).hasAuthority(AppRole.ADMIN.name());
+        auth.requestMatchers(HttpMethod.DELETE, PRODUCT_PATHS).hasAuthority(AppRole.ADMIN.name());
+        auth.requestMatchers(HttpMethod.POST, "/api/v1/images").hasAuthority(AppRole.ADMIN.name());
+    }
+
+    private void configureUserAccess(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth) {
+        auth.requestMatchers(HttpMethod.GET, USER_PATHS).hasAnyAuthority(AppRole.ADMIN.name(), AppRole.USER.name());
+        auth.requestMatchers(HttpMethod.POST, USER_PATHS).hasAuthority(AppRole.ADMIN.name());
+        auth.requestMatchers(HttpMethod.PUT, USER_PATHS).hasAnyAuthority(AppRole.ADMIN.name());
+        auth.requestMatchers(HttpMethod.DELETE, USER_PATHS).hasAuthority(AppRole.ADMIN.name());
+    }
+
+    private void configureAuthAccess(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry auth) {
+        auth.requestMatchers(AUTH_PATHS).permitAll();
     }
 
     @Bean

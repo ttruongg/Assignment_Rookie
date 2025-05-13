@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/admin/images")
+@RequestMapping("/api/v1/images")
 public class ImageUploadController {
 
     private final AwsS3ServiceImpl awsS3Service;
