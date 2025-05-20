@@ -3,6 +3,7 @@ package com.assignment.ecommerce_rookie.service.impl;
 import com.assignment.ecommerce_rookie.dto.ProductRatingDTO;
 import com.assignment.ecommerce_rookie.dto.ProductRatingResponse;
 import com.assignment.ecommerce_rookie.exception.APIException;
+import com.assignment.ecommerce_rookie.exception.NotFoundException;
 import com.assignment.ecommerce_rookie.mapper.ProductRatingMapper;
 import com.assignment.ecommerce_rookie.model.Product;
 import com.assignment.ecommerce_rookie.model.ProductRating;
@@ -35,10 +36,10 @@ public class ProductRatingServiceImpl implements IProductRatingService {
         }
 
         User user = userRepository.findById(ratingDTO.getUserId())
-                .orElseThrow(() -> new APIException("User not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("User", "UserId", ratingDTO.getUserId()));
 
         Product product = productRepository.findById(ratingDTO.getProductId())
-                .orElseThrow(() -> new APIException("Product not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("Product", "productId", ratingDTO.getProductId()));
 
         ProductRating rating = productRatingMapper.toProductRating(ratingDTO);
 
@@ -55,7 +56,7 @@ public class ProductRatingServiceImpl implements IProductRatingService {
         RatingId ratingId = new RatingId(ratingDTO.getUserId(), ratingDTO.getProductId());
 
         ProductRating existingRating = ratingRepository.findById(ratingId)
-                .orElseThrow(() -> new APIException("Rating not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException("Rating", "userId=" + ratingDTO.getUserId(), "productId=" + ratingDTO.getProductId()));
 
         existingRating.setRating(ratingDTO.getRating());
         existingRating.setComment(ratingDTO.getComment());
@@ -68,8 +69,8 @@ public class ProductRatingServiceImpl implements IProductRatingService {
     @Override
     public List<ProductRatingResponse> getRatingsByProduct(Long productId) {
         productRepository.findById(productId)
-                .orElseThrow(() -> new APIException("Product not found", HttpStatus.NOT_FOUND));
-        
+                .orElseThrow(() -> new NotFoundException("Product", "productId", productId));
+
         return ratingRepository.getRatingByProduct(productId);
 
     }

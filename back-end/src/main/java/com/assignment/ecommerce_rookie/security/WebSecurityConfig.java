@@ -31,10 +31,10 @@ import java.util.List;
 @EnableWebSecurity
 public class WebSecurityConfig {
 
-    private static final String[] CATEGORY_PATHS = {"/api/v1/categories/**"};
-    private static final String[] PRODUCT_PATHS = {"/api/v1/products/**"};
-    private static final String[] USER_PATHS = {"/api/v1/users/**"};
-    private static final String[] AUTH_PATHS = {"/api/v1/auth/**"};
+    private static final String CATEGORY_PATHS = "/api/v1/categories/**";
+    private static final String PRODUCT_PATHS = "/api/v1/products/**";
+    private static final String USER_PATHS = "/api/v1/users/**";
+    private static final String AUTH_PATHS = "/api/v1/auth/**";
 
     @Autowired
     UserDetailsServiceImpl userDetailsService;

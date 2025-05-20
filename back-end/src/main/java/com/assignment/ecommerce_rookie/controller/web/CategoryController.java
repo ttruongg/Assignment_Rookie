@@ -5,6 +5,7 @@ import com.assignment.ecommerce_rookie.dto.CategoryDTO;
 import com.assignment.ecommerce_rookie.dto.CategoryResponse;
 import com.assignment.ecommerce_rookie.service.ICategoryService;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -15,13 +16,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/categories")
+@AllArgsConstructor
 public class CategoryController {
 
     private final ICategoryService categoryService;
-
-    public CategoryController(ICategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
 
     @GetMapping
     public ResponseEntity<CategoryResponse> getCategories(

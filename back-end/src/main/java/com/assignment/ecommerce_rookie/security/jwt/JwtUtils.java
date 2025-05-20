@@ -44,16 +44,8 @@ public class JwtUtils {
                 .map(Cookie::getValue);
     }
 
-
-    public ResponseCookie generateAccessTokenCookie(UserDetailsImpl userDetails) {
-        String jwt = generateToken(userDetails.getUsername(), accessExpirationMs);
-        return ResponseCookie.from(accessTokenCookie, jwt)
-                .path("/api")
-                .maxAge(accessExpirationMs / 1000)
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Strict")
-                .build();
+    public String generateAccessToken(UserDetailsImpl userDetails){
+        return generateToken(userDetails.getUsername(), accessExpirationMs);
     }
 
     public ResponseCookie generateRefreshTokenCookie(UserDetailsImpl userDetails) {

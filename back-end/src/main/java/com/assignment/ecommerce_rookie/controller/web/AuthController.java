@@ -4,13 +4,11 @@ import com.assignment.ecommerce_rookie.security.jwt.JwtUtils;
 import com.assignment.ecommerce_rookie.security.request.LoginRequest;
 import com.assignment.ecommerce_rookie.security.request.SignUpRequest;
 import com.assignment.ecommerce_rookie.security.response.MessageResponse;
-import com.assignment.ecommerce_rookie.security.response.UserInfoResponse;
+import com.assignment.ecommerce_rookie.security.response.LoginResponse;
 import com.assignment.ecommerce_rookie.security.services.UserDetailsImpl;
 import com.assignment.ecommerce_rookie.service.IAuthService;
-import com.assignment.ecommerce_rookie.service.impl.AuthServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -37,16 +35,13 @@ public class AuthController {
         this.jwtUtils = jwtUtils;
     }
 
-    @PostMapping("/signin")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        UserInfoResponse response = authService.login(loginRequest);
-        ResponseCookie accessTokenCookie = jwtUtils.generateAccessTokenCookie(
-                (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
+        LoginResponse response = authService.login(loginRequest);
         ResponseCookie refreshTokenCookie = jwtUtils.generateRefreshTokenCookie(
                 (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .body(response);
     }
@@ -56,11 +51,8 @@ public class AuthController {
         return jwtUtils.getJwtFromCookie(request, refreshTokenCookie)
                 .map(refreshToken -> {
                     try {
-                        UserInfoResponse response = authService.refreshAccessToken(refreshToken);
-                        ResponseCookie accessTokenCookie = jwtUtils.generateAccessTokenCookie(
-                                (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+                        LoginResponse response = authService.refreshAccessToken(refreshToken);
                         return ResponseEntity.ok()
-                                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
                                 .body(response);
                     } catch (RuntimeException e) {
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

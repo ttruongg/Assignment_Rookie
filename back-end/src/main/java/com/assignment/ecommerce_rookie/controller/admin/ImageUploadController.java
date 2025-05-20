@@ -1,6 +1,7 @@
 package com.assignment.ecommerce_rookie.controller.admin;
 
 import com.assignment.ecommerce_rookie.service.impl.AwsS3ServiceImpl;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,14 +15,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/v1/images")
 public class ImageUploadController {
 
     private final AwsS3ServiceImpl awsS3Service;
-
-    public ImageUploadController(AwsS3ServiceImpl awsS3Service) {
-        this.awsS3Service = awsS3Service;
-    }
 
     @PostMapping
     public ResponseEntity<List<String>> uploadImages(@RequestParam("files") MultipartFile[] files) {
