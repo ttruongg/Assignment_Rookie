@@ -1,4 +1,4 @@
-package com.assignment.ecommerce_rookie.dto;
+package com.assignment.ecommerce_rookie.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,14 +11,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Setter
-public class ProductRatingResponse {
+public class ProductRatingDTO {
     private Long userId;
     private Long productId;
     private int rating;
     private String comment;
     private LocalDateTime created_at;
     private LocalDateTime updated_at;
-    private String firstName;
-    private String lastName;
-
 }

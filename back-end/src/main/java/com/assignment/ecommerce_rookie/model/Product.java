@@ -23,6 +23,7 @@ import java.util.Set;
 @Table(name = "product")
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Product {
 
     @Id

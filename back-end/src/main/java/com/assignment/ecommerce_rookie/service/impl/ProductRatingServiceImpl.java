@@ -1,7 +1,7 @@
 package com.assignment.ecommerce_rookie.service.impl;
 
-import com.assignment.ecommerce_rookie.dto.ProductRatingDTO;
-import com.assignment.ecommerce_rookie.dto.ProductRatingResponse;
+import com.assignment.ecommerce_rookie.dto.request.ProductRatingDTO;
+import com.assignment.ecommerce_rookie.dto.response.ProductRatingResponse;
 import com.assignment.ecommerce_rookie.exception.APIException;
 import com.assignment.ecommerce_rookie.mapper.ProductRatingMapper;
 import com.assignment.ecommerce_rookie.model.Product;
@@ -73,6 +73,5 @@ public class ProductRatingServiceImpl implements IProductRatingService {
         return ratingRepository.getRatingByProduct(productId);
 
     }
-
 
 }

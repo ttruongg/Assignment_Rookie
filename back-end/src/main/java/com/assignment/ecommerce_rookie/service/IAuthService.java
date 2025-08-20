@@ -1,12 +1,12 @@
 package com.assignment.ecommerce_rookie.service;
 
-import com.assignment.ecommerce_rookie.security.request.LoginRequest;
-import com.assignment.ecommerce_rookie.security.request.SignUpRequest;
-import com.assignment.ecommerce_rookie.security.response.UserInfoResponse;
+import com.assignment.ecommerce_rookie.dto.request.LoginRequest;
+import com.assignment.ecommerce_rookie.dto.request.SignUpRequest;
+import com.assignment.ecommerce_rookie.dto.request.UserDTO;
+import com.assignment.ecommerce_rookie.dto.response.LoginResponse;
 
 public interface IAuthService {
-    UserInfoResponse login(LoginRequest loginRequest);
-    UserInfoResponse refreshAccessToken(String refreshToken);
-    void signup(SignUpRequest signUpRequest);
+    LoginResponse login(LoginRequest loginRequest);
+    UserDTO signup(SignUpRequest signUpRequest);
     void logout();
 }

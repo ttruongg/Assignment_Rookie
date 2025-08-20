@@ -1,4 +1,4 @@
-package com.assignment.ecommerce_rookie.security.request;
+package com.assignment.ecommerce_rookie.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

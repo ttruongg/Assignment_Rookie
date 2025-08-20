@@ -1,22 +1,20 @@
 package com.assignment.ecommerce_rookie.controller.admin;
 
-import com.assignment.ecommerce_rookie.dto.ProductDTO;
+import com.assignment.ecommerce_rookie.dto.request.ProductDTO;
 import com.assignment.ecommerce_rookie.service.IProductService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/v1/products")
 public class AdminProductController {
 
     private final IProductService productService;
-
-    public AdminProductController(IProductService productService) {
-        this.productService = productService;
-    }
 
     @PostMapping
     public ResponseEntity<ProductDTO> addProduct(@RequestBody @Valid ProductDTO productDTO) {
@@ -24,7 +22,6 @@ public class AdminProductController {
         ProductDTO savedProduct = productService.addProduct(productDTO);
         return new ResponseEntity<>(savedProduct, HttpStatus.CREATED);
     }
-
 
     @PutMapping("/{productId}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long productId, @RequestBody ProductDTO productDTO) {

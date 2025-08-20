@@ -27,35 +27,39 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Autowired
     UserDetailsService userDetailsService;
 
-    @Value("${jwt.AccessTokenCookieName}")
-    private String accessTokenCookie;
-
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String BEARER_TOKEN_PREFIX = "Bearer ";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
-        logger.debug("AuthTokenFilter called for URI: {}", request.getRequestURI());
 
+        logger.debug("AuthTokenFilter called for URI: {}", request.getRequestURI());
+        String authHeader = request.getHeader(AUTHORIZATION_HEADER);
 
         try {
-            String jwt = parseJwt(request);
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-                String username = jwtUtils.getUserNameFromJwtToken(jwt);
+            if (authHeader != null && authHeader.startsWith(BEARER_TOKEN_PREFIX)) {
+                String jwt = authHeader.substring(BEARER_TOKEN_PREFIX.length());
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                if (jwtUtils.validateJwtToken(jwt)) {
+                    String username = jwtUtils.getUserNameFromJwtToken(jwt);
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(userDetails,
-                                null,
-                                userDetails.getAuthorities());
-                logger.debug("Roles from JWT: {}", userDetails.getAuthorities());
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(userDetails,
+                                    null,
+                                    userDetails.getAuthorities());
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    logger.debug("Roles from JWT: {}", userDetails.getAuthorities());
+
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
+
         } catch (Exception e) {
             logger.error("Cannot set user authentication: {}", e);
         }
@@ -64,9 +68,4 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     }
 
-    private String parseJwt(HttpServletRequest request) {
-        String jwt = jwtUtils.getJwtFromCookie(request, accessTokenCookie).orElse(null);
-        logger.debug("AuthTokenFilter.java: {}", jwt);
-        return jwt;
-    }
 }

@@ -1,7 +1,7 @@
 package com.assignment.ecommerce_rookie.service.impl;
 
-import com.assignment.ecommerce_rookie.dto.ProductDTO;
-import com.assignment.ecommerce_rookie.dto.ProductResponse;
+import com.assignment.ecommerce_rookie.dto.request.ProductDTO;
+import com.assignment.ecommerce_rookie.dto.response.ProductResponse;
 import com.assignment.ecommerce_rookie.exception.APIException;
 import com.assignment.ecommerce_rookie.exception.NotFoundException;
 import com.assignment.ecommerce_rookie.mapper.ProductMapper;
@@ -14,7 +14,7 @@ import com.assignment.ecommerce_rookie.service.IProductService;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,21 +32,12 @@ import java.util.stream.Collectors;
 import static com.assignment.ecommerce_rookie.constants.AppConstants.DISCOUNT_PERCENT_DIVISOR;
 
 @Service
+@AllArgsConstructor
 public class ProductServiceImpl implements IProductService {
 
     private final ProductRepository productRepository;
-
-
     private final CategoryRepository categoryRepository;
-
-
     private final ProductMapper productMapper;
-
-    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository, ProductMapper productMapper) {
-        this.productRepository = productRepository;
-        this.categoryRepository = categoryRepository;
-        this.productMapper = productMapper;
-    }
 
     @Override
     public ProductDTO getProductById(Long productId) {
@@ -63,11 +54,9 @@ public class ProductServiceImpl implements IProductService {
         Page<Product> productsPage = productRepository.findAll(specification, pageable);
         List<ProductDTO> productDTOs = convertToProductDTOs(productsPage.getContent());
 
-        return buildProductResponse(productsPage, productDTOs);
+        return productMapper.initProductResponse(productsPage, productDTOs);
 
     }
-
-
 
     private Pageable createPageable(int pageNumber, int pageSize, String sortBy, String sortOrder) {
         Sort sort = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
@@ -79,8 +68,6 @@ public class ProductServiceImpl implements IProductService {
                 .and(applyCategoryFilter(category))
                 .and(applyFeaturedFilter(featured));
     }
-
-
 
     private Specification<Product> applyKeywordFilter(String keyword) {
         if (keyword == null || keyword.isEmpty()) {
@@ -95,7 +82,6 @@ public class ProductServiceImpl implements IProductService {
         }
         return (root, query, cb) -> cb.equal(root.get("featured"), featured);
     }
-
 
     private List<ProductDTO> convertToProductDTOs(List<Product> products) {
         return products.stream()
@@ -113,57 +99,53 @@ public class ProductServiceImpl implements IProductService {
         };
     }
 
-    private ProductResponse buildProductResponse(Page<Product> productsPage, List<ProductDTO> productDTOs) {
-        ProductResponse response = new ProductResponse();
-        response.setProducts(productDTOs);
-        response.setPageNumber(productsPage.getNumber());
-        response.setPageSize(productsPage.getSize());
-        response.setTotalElements(productsPage.getTotalElements());
-        response.setLastPage(productsPage.isLast());
-        response.setTotalPages(productsPage.getTotalPages());
-        return response;
-    }
-
     @Override
     @Transactional
     public ProductDTO addProduct(ProductDTO productDTO) {
 
-        Set<Long> categoryIds = productDTO.getCategoryIds();
+        validateCategoryIds(productDTO.getCategoryIds());
+        Set<Category> categories = fetchCategories(productDTO.getCategoryIds());
+        validateUniqueProduct(categories, productDTO.getProductName());
+        Product product = buildProduct(productDTO, categories);
+        Product savedProduct = productRepository.save(product);
+
+        return productMapper.toProductDTO(savedProduct);
+
+    }
+
+    private void validateCategoryIds(Set<Long> categoryIds) {
         if (categoryIds == null || categoryIds.isEmpty()) {
             throw new APIException("Product must belong to at least one category");
         }
+    }
 
-
+    private Set<Category> fetchCategories(Set<Long> categoryIds) {
         Set<Category> categories = new HashSet<>(categoryRepository.findAllById(categoryIds));
 
         if (categories.isEmpty()) {
             throw new NotFoundException("category", "ids", categoryIds.toString());
         }
+        return categories;
+    }
 
-
+    private void validateUniqueProduct(Set<Category> categories, String productName) {
         boolean exists = categories.stream()
                 .flatMap(c -> c.getProducts().stream())
-                .anyMatch(p -> p.getProductName().equalsIgnoreCase(productDTO.getProductName()));
+                .anyMatch(p -> p.getProductName().equalsIgnoreCase(productName));
 
         if (exists) {
             throw new APIException("Product already exists in selected categories");
         }
 
+    }
 
+    private Product buildProduct(ProductDTO productDTO, Set<Category> categories) {
         Product product = productMapper.toProduct(productDTO);
         product.setCategories(categories);
-
-        List<ProductImage> images = mapProductImages(productDTO.getImages(), product);
-
-        product.setImages(images);
-
-        BigDecimal specialPrice = calculateSpecialPrice(product.getPrice(), product.getDiscount());
-        product.setSpecialPrice(specialPrice);
+        product.setImages(mapProductImages(productDTO.getImages(), product));
+        product.setSpecialPrice(calculateSpecialPrice(product.getPrice(), product.getDiscount()));
         product.setActive(true);
-
-        Product savedProduct = productRepository.save(product);
-        return productMapper.toProductDTO(savedProduct);
-
+        return product;
     }
 
     private List<ProductImage> mapProductImages(List<ProductImage> images, Product product) {
@@ -189,27 +171,25 @@ public class ProductServiceImpl implements IProductService {
         Product productDB = productRepository.findById(productId)
                 .orElseThrow(() -> new NotFoundException("product", "productId", productId));
 
-        Product product = productMapper.toProduct(productDTO);
-
-        productDB.setProductName(product.getProductName());
-        productDB.setDescription(product.getDescription());
-        productDB.setQuantity(product.getQuantity());
-        productDB.setDiscount(product.getDiscount());
-        productDB.setPrice(product.getPrice());
-        productDB.setSpecialPrice(product.getSpecialPrice());
-        productDB.setBrand(product.getBrand());
-        productDB.setFeatured(product.isFeatured());
+        productMapper.updateProductFromDto(productDTO, productDB);
 
         if (productDTO.getCategoryIds() != null && !productDTO.getCategoryIds().isEmpty()) {
             Set<Category> updatedCategories = new HashSet<>(categoryRepository.findAllById(productDTO.getCategoryIds()));
             productDB.setCategories(updatedCategories);
         }
 
-
         Product savedProduct = productRepository.save(productDB);
-
-
         return productMapper.toProductDTO(savedProduct);
+    }
+    private void updateProductsFields(Product product, ProductDTO productDTO) {
+        product.setProductName(productDTO.getProductName());
+        product.setDescription(productDTO.getDescription());
+        product.setQuantity(productDTO.getQuantity());
+        product.setDiscount(productDTO.getDiscount());
+        product.setPrice(productDTO.getPrice());
+        product.setSpecialPrice(calculateSpecialPrice(product.getPrice(), product.getDiscount()));
+        product.setBrand(productDTO.getBrand());
+        product.setFeatured(productDTO.isFeatured());
     }
 
     @Transactional
@@ -219,7 +199,6 @@ public class ProductServiceImpl implements IProductService {
                 .orElseThrow(() -> new NotFoundException("Product", "productId", productId));
 
         productRepository.delete(product);
-
         return productMapper.toProductDTO(product);
     }
 
@@ -232,6 +211,5 @@ public class ProductServiceImpl implements IProductService {
         productRepository.save(product);
         return productMapper.toProductDTO(product);
     }
-
 
 }

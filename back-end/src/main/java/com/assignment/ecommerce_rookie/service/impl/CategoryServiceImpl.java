@@ -1,15 +1,15 @@
 package com.assignment.ecommerce_rookie.service.impl;
 
-import com.assignment.ecommerce_rookie.dto.CategoryDTO;
-import com.assignment.ecommerce_rookie.dto.CategoryResponse;
+import com.assignment.ecommerce_rookie.dto.request.CategoryDTO;
+import com.assignment.ecommerce_rookie.dto.response.CategoryResponse;
 import com.assignment.ecommerce_rookie.exception.APIException;
 import com.assignment.ecommerce_rookie.exception.NotFoundException;
 import com.assignment.ecommerce_rookie.mapper.CategoryMapper;
 import com.assignment.ecommerce_rookie.model.Category;
-import com.assignment.ecommerce_rookie.model.Product;
 import com.assignment.ecommerce_rookie.repository.CategoryRepository;
 import com.assignment.ecommerce_rookie.service.ICategoryService;
 import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -20,13 +20,11 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@AllArgsConstructor
 @Service
 public class CategoryServiceImpl implements ICategoryService {
 
-    @Autowired
     private CategoryRepository categoryRepository;
-
-    @Autowired
     private CategoryMapper categoryMapper;
 
     @Override
@@ -38,7 +36,7 @@ public class CategoryServiceImpl implements ICategoryService {
         Page<Category> categoryPage = categoryRepository.findAll(specification, pageable);
         List<CategoryDTO> categoryDTOs = convertToCategoryDTOs(categoryPage.getContent());
 
-        return buildCategoryResponse(categoryPage, categoryDTOs);
+        return categoryMapper.initCategoryResponse(categoryPage, categoryDTOs);
     }
 
     private Pageable createPageable(int pageNumber, int pageSize, String sortBy, String sortOrder) {
@@ -65,18 +63,6 @@ public class CategoryServiceImpl implements ICategoryService {
                 .map(categoryMapper::toCategoryDTO)
                 .toList();
     }
-
-    private CategoryResponse buildCategoryResponse(Page<Category> categoryPage, List<CategoryDTO> categoryDTOList) {
-        CategoryResponse response = new CategoryResponse();
-        response.setCategories(categoryDTOList);
-        response.setPageNumber(categoryPage.getNumber());
-        response.setPageSize(categoryPage.getSize());
-        response.setTotalElements(categoryPage.getTotalElements());
-        response.setTotalPages(categoryPage.getTotalPages());
-        response.setLastPage(categoryPage.isLast());
-        return response;
-    }
-
 
     @Transactional
     @Override

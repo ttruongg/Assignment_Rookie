@@ -1,12 +1,13 @@
-package com.assignment.ecommerce_rookie.dto;
+package com.assignment.ecommerce_rookie.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.assignment.ecommerce_rookie.dto.request.ProductDTO;
+import lombok.*;
 
 import java.util.List;
 
-@Data
+@Getter
+@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductResponse {

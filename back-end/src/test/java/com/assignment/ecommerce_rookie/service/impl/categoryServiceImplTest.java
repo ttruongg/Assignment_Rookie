@@ -1,6 +1,6 @@
 package com.assignment.ecommerce_rookie.service.impl;
 
-import com.assignment.ecommerce_rookie.dto.CategoryDTO;
+import com.assignment.ecommerce_rookie.dto.request.CategoryDTO;
 import com.assignment.ecommerce_rookie.exception.APIException;
 import com.assignment.ecommerce_rookie.exception.NotFoundException;
 import com.assignment.ecommerce_rookie.mapper.CategoryMapper;

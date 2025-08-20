@@ -1,17 +1,18 @@
 package com.assignment.ecommerce_rookie.controller.web;
 
+import com.assignment.ecommerce_rookie.dto.request.UserDTO;
+import com.assignment.ecommerce_rookie.dto.response.RefreshAccessTokenResponse;
 import com.assignment.ecommerce_rookie.security.jwt.JwtUtils;
-import com.assignment.ecommerce_rookie.security.request.LoginRequest;
-import com.assignment.ecommerce_rookie.security.request.SignUpRequest;
+import com.assignment.ecommerce_rookie.dto.request.LoginRequest;
+import com.assignment.ecommerce_rookie.dto.request.SignUpRequest;
 import com.assignment.ecommerce_rookie.security.response.MessageResponse;
-import com.assignment.ecommerce_rookie.security.response.UserInfoResponse;
+import com.assignment.ecommerce_rookie.dto.response.LoginResponse;
 import com.assignment.ecommerce_rookie.security.services.UserDetailsImpl;
 import com.assignment.ecommerce_rookie.service.IAuthService;
-import com.assignment.ecommerce_rookie.service.impl.AuthServiceImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@AllArgsConstructor
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
@@ -29,53 +32,29 @@ public class AuthController {
     private final IAuthService authService;
     private final JwtUtils jwtUtils;
 
-    @Value("${jwt.RefreshTokenCookieName}")
-    private String refreshTokenCookie;
-
-    public AuthController(IAuthService authService, JwtUtils jwtUtils) {
-        this.authService = authService;
-        this.jwtUtils = jwtUtils;
-    }
-
     @PostMapping("/signin")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        UserInfoResponse response = authService.login(loginRequest);
-        ResponseCookie accessTokenCookie = jwtUtils.generateAccessTokenCookie(
-                (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+        LoginResponse response = authService.login(loginRequest);
+
         ResponseCookie refreshTokenCookie = jwtUtils.generateRefreshTokenCookie(
                 (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
                 .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
                 .body(response);
     }
 
-    @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshAccessToken(HttpServletRequest request) {
-        return jwtUtils.getJwtFromCookie(request, refreshTokenCookie)
-                .map(refreshToken -> {
-                    try {
-                        UserInfoResponse response = authService.refreshAccessToken(refreshToken);
-                        ResponseCookie accessTokenCookie = jwtUtils.generateAccessTokenCookie(
-                                (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal());
-                        return ResponseEntity.ok()
-                                .header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
-                                .body(response);
-                    } catch (RuntimeException e) {
-                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                                .body(new MessageResponse(e.getMessage()));
-                    }
-                })
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(new MessageResponse("Refresh token is missing")));
+    @PostMapping("/token/refresh")
+    public ResponseEntity<RefreshAccessTokenResponse> refreshAccessToken(HttpServletRequest request) {
+        RefreshAccessTokenResponse accessToken = new RefreshAccessTokenResponse(jwtUtils.generateAccessTokenFromCookie(request));
+        return ResponseEntity.ok().body(accessToken);
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
-        authService.signup(signUpRequest);
+    public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
+        UserDTO savedUser = authService.signup(signUpRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new MessageResponse("User registered successfully!"));
+                .body(savedUser);
     }
 
     @PostMapping("/logout")
