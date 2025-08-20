@@ -1,4 +1,4 @@
-package com.assignment.ecommerce_rookie.dto;
+package com.assignment.ecommerce_rookie.dto.request;
 
 import lombok.*;
 

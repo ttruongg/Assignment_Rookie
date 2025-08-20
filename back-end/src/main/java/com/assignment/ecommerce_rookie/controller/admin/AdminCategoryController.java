@@ -1,28 +1,25 @@
 package com.assignment.ecommerce_rookie.controller.admin;
 
-import com.assignment.ecommerce_rookie.dto.CategoryDTO;
+import com.assignment.ecommerce_rookie.dto.request.CategoryDTO;
 import com.assignment.ecommerce_rookie.service.ICategoryService;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("/api/v1/categories")
 public class AdminCategoryController {
 
     private final ICategoryService categoryService;
 
-    public AdminCategoryController(ICategoryService categoryService) {
-        this.categoryService = categoryService;
-    }
-
     @PostMapping
     public ResponseEntity<CategoryDTO> createCategory(@RequestBody @Valid CategoryDTO categoryDTO) {
         CategoryDTO savedCategory = categoryService.createCategory(categoryDTO);
         return new ResponseEntity<>(savedCategory, HttpStatus.CREATED);
     }
-
 
     @DeleteMapping("/{categoryId}")
     public ResponseEntity<CategoryDTO> deleteCategory(@PathVariable Long categoryId) {

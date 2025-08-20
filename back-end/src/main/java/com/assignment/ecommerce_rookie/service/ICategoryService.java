@@ -1,7 +1,7 @@
 package com.assignment.ecommerce_rookie.service;
 
-import com.assignment.ecommerce_rookie.dto.CategoryDTO;
-import com.assignment.ecommerce_rookie.dto.CategoryResponse;
+import com.assignment.ecommerce_rookie.dto.request.CategoryDTO;
+import com.assignment.ecommerce_rookie.dto.response.CategoryResponse;
 
 public interface ICategoryService {
 

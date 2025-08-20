@@ -1,8 +1,8 @@
 package com.assignment.ecommerce_rookie.controller.web;
 
 
-import com.assignment.ecommerce_rookie.dto.ProductRatingDTO;
-import com.assignment.ecommerce_rookie.dto.ProductRatingResponse;
+import com.assignment.ecommerce_rookie.dto.request.ProductRatingDTO;
+import com.assignment.ecommerce_rookie.dto.response.ProductRatingResponse;
 import com.assignment.ecommerce_rookie.service.IProductRatingService;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;

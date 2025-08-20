@@ -1,6 +1,6 @@
 package com.assignment.ecommerce_rookie.repository;
 
-import com.assignment.ecommerce_rookie.dto.ProductRatingResponse;
+import com.assignment.ecommerce_rookie.dto.response.ProductRatingResponse;
 import com.assignment.ecommerce_rookie.model.Product;
 import com.assignment.ecommerce_rookie.model.ProductRating;
 import com.assignment.ecommerce_rookie.model.RatingId;
@@ -19,7 +19,7 @@ public interface ProductRatingRepository extends JpaRepository<ProductRating, Ra
 
     boolean existsByUserAndProduct(User user, Product product);
 
-    @Query("SELECT new com.assignment.ecommerce_rookie.dto.ProductRatingResponse( " +
+    @Query("SELECT new com.assignment.ecommerce_rookie.dto.response.ProductRatingResponse( " +
             "r.user.id, r.product.id, r.rating, r.comment, r.created_at, r.updated_at, r.user.firstName, r.user.lastName) " +
             "FROM ProductRating r WHERE r.product.id = :productId")
     List<ProductRatingResponse> getRatingByProduct(Long productId);

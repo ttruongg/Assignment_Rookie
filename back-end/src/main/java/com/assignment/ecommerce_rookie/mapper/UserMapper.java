@@ -1,6 +1,6 @@
 package com.assignment.ecommerce_rookie.mapper;
 
-import com.assignment.ecommerce_rookie.dto.UserDTO;
+import com.assignment.ecommerce_rookie.dto.request.UserDTO;
 import com.assignment.ecommerce_rookie.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

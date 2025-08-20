@@ -2,8 +2,7 @@ package com.assignment.ecommerce_rookie.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.assignment.ecommerce_rookie.dto.CategoryDTO;
-import com.assignment.ecommerce_rookie.mapper.CategoryMapper;
+import com.assignment.ecommerce_rookie.dto.request.CategoryDTO;
 import com.assignment.ecommerce_rookie.model.Category;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;

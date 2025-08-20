@@ -1,7 +1,7 @@
 package com.assignment.ecommerce_rookie.service;
 
-import com.assignment.ecommerce_rookie.dto.ProductRatingDTO;
-import com.assignment.ecommerce_rookie.dto.ProductRatingResponse;
+import com.assignment.ecommerce_rookie.dto.request.ProductRatingDTO;
+import com.assignment.ecommerce_rookie.dto.response.ProductRatingResponse;
 
 import java.util.List;
 

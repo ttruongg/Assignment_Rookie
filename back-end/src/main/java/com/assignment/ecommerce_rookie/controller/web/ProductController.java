@@ -1,23 +1,19 @@
 package com.assignment.ecommerce_rookie.controller.web;
 
 import com.assignment.ecommerce_rookie.constants.AppConstants;
-import com.assignment.ecommerce_rookie.dto.ProductDTO;
-import com.assignment.ecommerce_rookie.dto.ProductResponse;
+import com.assignment.ecommerce_rookie.dto.request.ProductDTO;
+import com.assignment.ecommerce_rookie.dto.response.ProductResponse;
 import com.assignment.ecommerce_rookie.service.IProductService;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/v1/products")
 public class ProductController {
     private final IProductService productService;
-
-    public ProductController(IProductService productService) {
-        this.productService = productService;
-    }
 
     @GetMapping
     public ResponseEntity<ProductResponse> getAllProduct(

@@ -2,27 +2,36 @@ package com.assignment.ecommerce_rookie.security.jwt;
 
 
 import com.assignment.ecommerce_rookie.security.services.UserDetailsImpl;
+import com.assignment.ecommerce_rookie.security.services.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 
 import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Component
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
+    private static final String CLAIM_NAME_USER_ID = "userId";
+    private static final String CLAIM_NAME_ROLE = "role";
+
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Value("${jwtSecret}")
     private String jwtSecret;
@@ -39,68 +48,76 @@ public class JwtUtils {
     @Value("${jwt.RefreshTokenCookieName}")
     private String refreshTokenCookie;
 
+    private static final String REFRESH_TOKEN_PATH = "/api/v1/auth/token/refresh";
+
+    public JwtUtils(UserDetailsServiceImpl userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+
     public Optional<String> getJwtFromCookie(HttpServletRequest request, String cookieName) {
         return Optional.ofNullable(WebUtils.getCookie(request, cookieName))
                 .map(Cookie::getValue);
     }
 
+    public String generateAccessToken(UserDetailsImpl userDetails) {
+        return generateToken(userDetails, accessExpirationMs);
+    }
 
-    public ResponseCookie generateAccessTokenCookie(UserDetailsImpl userDetails) {
-        String jwt = generateToken(userDetails.getUsername(), accessExpirationMs);
-        return ResponseCookie.from(accessTokenCookie, jwt)
-                .path("/api")
-                .maxAge(accessExpirationMs / 1000)
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Strict")
-                .build();
+    public String generateRefreshToken(UserDetailsImpl userDetails){
+        return generateToken(userDetails, refreshExpirationMs);
     }
 
     public ResponseCookie generateRefreshTokenCookie(UserDetailsImpl userDetails) {
-        String jwt = generateToken(userDetails.getUsername(), refreshExpirationMs);
-        return ResponseCookie.from(refreshTokenCookie, jwt)
-                .path("/api/auth/refresh-token")
-                .maxAge(refreshExpirationMs / 1000)
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Strict")
-                .build();
+        String jwt = generateToken(userDetails, refreshExpirationMs);
+        return buildCookie(refreshTokenCookie, jwt, REFRESH_TOKEN_PATH, refreshExpirationMs);
     }
 
+    private String generateToken(UserDetailsImpl user, long expirationMs) {
+        List<String> roleNames = user.getAuthorities().stream()
+                .map(authority -> authority.getAuthority())
+                .collect(Collectors.toList());
 
-    private String generateToken(String username, long expirationMs) {
         return Jwts.builder()
-                .setSubject(username)
+                .subject(user.getUsername())
+                .claim(CLAIM_NAME_ROLE, roleNames)
+                .claim(CLAIM_NAME_USER_ID, user.getId())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public ResponseCookie cleanAccessTokenCookie() {
-        ResponseCookie accessCookie = ResponseCookie.from(accessTokenCookie, null)
-                .path("/api")
-                .maxAge(0)
+    private ResponseCookie buildCookie(String name, String value, String path, long maxAge) {
+        return ResponseCookie.from(name, value)
+                .path(path)
+                .maxAge(maxAge / 1000)
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("Strict")
                 .build();
+    }
 
-        return accessCookie;
-
-
+    public ResponseCookie cleanAccessTokenCookie() {
+        return buildCookie(accessTokenCookie, "", "/", 0);
     }
 
     public ResponseCookie cleanRefreshTokenCookie() {
-        ResponseCookie refreshCookie = ResponseCookie.from(refreshTokenCookie, null)
-                .path("/api/auth/refresh-token")
-                .maxAge(0)
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Strict")
-                .build();
+        return buildCookie(refreshTokenCookie, "", REFRESH_TOKEN_PATH, 0);
+    }
 
-        return refreshCookie;
+    public String generateAccessTokenFromCookie(HttpServletRequest request) {
+        Optional<String> refreshTokenOpt = getJwtFromCookie(request, refreshTokenCookie);
+        String refreshToken = refreshTokenOpt.get();
+        Boolean isTokenValid = validateJwtToken(refreshToken);
+        if (isTokenValid) {
+            String username = getUserNameFromJwtToken(refreshToken);
+            UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
+            if (userDetails != null && userDetails.getUsername().equals(username)) {
+                return generateAccessToken(userDetails);
+            }
+        }
+        return null;
+
     }
 
     private Key key() {

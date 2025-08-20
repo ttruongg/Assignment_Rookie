@@ -1,11 +1,10 @@
-package com.assignment.ecommerce_rookie.dto;
+package com.assignment.ecommerce_rookie.dto.request;
 
 import com.assignment.ecommerce_rookie.model.ProductImage;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

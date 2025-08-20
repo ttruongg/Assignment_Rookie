@@ -1,6 +1,6 @@
 package com.assignment.ecommerce_rookie.exception;
 
-import com.assignment.ecommerce_rookie.dto.APIResponse;
+import com.assignment.ecommerce_rookie.dto.response.APIResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;

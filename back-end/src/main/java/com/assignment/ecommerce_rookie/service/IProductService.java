@@ -1,7 +1,7 @@
 package com.assignment.ecommerce_rookie.service;
 
-import com.assignment.ecommerce_rookie.dto.ProductDTO;
-import com.assignment.ecommerce_rookie.dto.ProductResponse;
+import com.assignment.ecommerce_rookie.dto.request.ProductDTO;
+import com.assignment.ecommerce_rookie.dto.response.ProductResponse;
 
 public interface IProductService {
     /**
