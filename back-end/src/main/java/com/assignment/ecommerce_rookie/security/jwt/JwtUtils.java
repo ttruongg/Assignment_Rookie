@@ -1,6 +1,8 @@
 package com.assignment.ecommerce_rookie.security.jwt;
 
 
+import com.assignment.ecommerce_rookie.dto.request.TokenPair;
+import com.assignment.ecommerce_rookie.exception.TokenMissingException;
 import com.assignment.ecommerce_rookie.security.services.UserDetailsImpl;
 import com.assignment.ecommerce_rookie.security.services.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
@@ -8,12 +10,11 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 
@@ -22,7 +23,6 @@ import java.security.Key;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 @Component
@@ -59,6 +59,16 @@ public class JwtUtils {
                 .map(Cookie::getValue);
     }
 
+    public Optional<String> getRefreshTokenFromCookie(HttpServletRequest request) {
+        return getJwtFromCookie(request, refreshTokenCookie);
+    }
+
+    public TokenPair generateTokenPair(UserDetailsImpl userDetails) {
+        String accessToken = generateAccessToken(userDetails);
+        String refreshToken = generateRefreshToken(userDetails);
+        return new TokenPair(accessToken, refreshToken, accessExpirationMs, refreshExpirationMs);
+    }
+
     public String generateAccessToken(UserDetailsImpl userDetails) {
         return generateToken(userDetails, accessExpirationMs);
     }
@@ -74,16 +84,16 @@ public class JwtUtils {
 
     private String generateToken(UserDetailsImpl user, long expirationMs) {
         List<String> roleNames = user.getAuthorities().stream()
-                .map(authority -> authority.getAuthority())
-                .collect(Collectors.toList());
+                .map(GrantedAuthority::getAuthority)
+                .toList();
 
         return Jwts.builder()
                 .subject(user.getUsername())
                 .claim(CLAIM_NAME_ROLE, roleNames)
                 .claim(CLAIM_NAME_USER_ID, user.getId())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(key(), SignatureAlgorithm.HS256)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expirationMs))
+                .signWith(key())
                 .compact();
     }
 
@@ -107,8 +117,8 @@ public class JwtUtils {
 
     public String generateAccessTokenFromCookie(HttpServletRequest request) {
         Optional<String> refreshTokenOpt = getJwtFromCookie(request, refreshTokenCookie);
-        String refreshToken = refreshTokenOpt.get();
-        Boolean isTokenValid = validateJwtToken(refreshToken);
+        String refreshToken = refreshTokenOpt.orElseThrow(() -> new TokenMissingException("Refresh token is missing"));
+        boolean isTokenValid = validateJwtToken(refreshToken);
         if (isTokenValid) {
             String username = getUserNameFromJwtToken(refreshToken);
             UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
@@ -130,6 +140,13 @@ public class JwtUtils {
                 .verifyWith((SecretKey) key())
                 .build().parseSignedClaims(token)
                 .getPayload().getSubject();
+    }
+
+    public Date getExpirationDate(String token) {
+        return Jwts.parser()
+                .verifyWith((SecretKey) key())
+                .build().parseSignedClaims(token)
+                .getPayload().getExpiration();
     }
 
     public boolean validateJwtToken(String authToken) {

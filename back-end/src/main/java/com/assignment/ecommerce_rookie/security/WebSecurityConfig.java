@@ -4,7 +4,7 @@ import com.assignment.ecommerce_rookie.model.AppRole;
 import com.assignment.ecommerce_rookie.security.jwt.AuthEntryPointJwt;
 import com.assignment.ecommerce_rookie.security.jwt.AuthTokenFilter;
 import com.assignment.ecommerce_rookie.security.services.UserDetailsServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -29,6 +29,7 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfig {
 
     private static final String[] CATEGORY_PATHS = {"/api/v1/categories/**"};
@@ -36,16 +37,9 @@ public class WebSecurityConfig {
     private static final String[] USER_PATHS = {"/api/v1/users/**"};
     private static final String[] AUTH_PATHS = {"/api/v1/auth/**"};
 
-    @Autowired
-    UserDetailsServiceImpl userDetailsService;
-
-    @Autowired
-    private AuthEntryPointJwt unauthorizedHandler;
-
-    @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter();
-    }
+    private final UserDetailsServiceImpl userDetailsService;
+    private final AuthEntryPointJwt unauthorizedHandler;
+    private final AuthTokenFilter authenticationJwtTokenFilter;
 
 
     @Bean
@@ -91,7 +85,7 @@ public class WebSecurityConfig {
 
         http.authenticationProvider(authenticationProvider());
 
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(authenticationJwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
 
         return http.build();
