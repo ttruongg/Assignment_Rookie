@@ -46,7 +46,7 @@ public class AuthController {
 
     @PostMapping("/token/refresh")
     public ResponseEntity<RefreshAccessTokenResponse> refreshAccessToken(HttpServletRequest request) {
-        RefreshAccessTokenResponse accessToken = new RefreshAccessTokenResponse(jwtUtils.generateAccessTokenFromCookie(request));
+        RefreshAccessTokenResponse accessToken = authService.refreshAccessToken(request);
         return ResponseEntity.ok().body(accessToken);
     }
 
@@ -58,12 +58,9 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout() {
-        jwtUtils.cleanAccessTokenCookie();
+    public ResponseEntity<MessageResponse> logout() {
+        authService.logout();
         jwtUtils.cleanRefreshTokenCookie();
-        SecurityContextHolder.clearContext();
         return ResponseEntity.ok().body(new MessageResponse("User logged out successfully!"));
     }
-
-
 }
